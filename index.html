@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home | iskandar afiq</title>
+  <meta name="description" content="iskandar afiq is him. Creative writing portfolio, scripts, short stories, zines, tech reviews, and thoughts." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Header & Navigation -->
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="#home" class="brand-logo" onclick="navigateTo('home'); return false;">iskandar afiq</a>
+
+      <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle Menu">menu.</button>
+
+      <nav class="site-nav" id="site-nav" aria-label="Primary Navigation">
+        <!-- works. -->
+        <div class="nav-item">
+          <button class="nav-dropdown-btn" type="button">
+            works. <span class="nav-caret">▾</span>
+          </button>
+          <div class="dropdown-menu">
+            <a href="#my-scripts" class="dropdown-link" data-route="my-scripts" onclick="navigateTo('my-scripts'); return false;">my scripts sample.</a>
+            <a href="#anna" class="dropdown-link" data-route="anna" onclick="navigateTo('anna'); return false;">anna. (short story)</a>
+            <a href="#sinister-roots-zine" class="dropdown-link" data-route="sinister-roots-zine" onclick="navigateTo('sinister-roots-zine'); return false;">sinister roots (zine sample)</a>
+          </div>
+        </div>
+
+        <!-- tech reviews -->
+        <div class="nav-item">
+          <button class="nav-dropdown-btn" type="button">
+            tech reviews <span class="nav-caret">▾</span>
+          </button>
+          <div class="dropdown-menu">
+            <a href="#audio-devices" class="dropdown-link" data-route="audio-devices" onclick="navigateTo('audio-devices'); return false;">audio devices.</a>
+            <a href="#phones" class="dropdown-link" data-route="phones" onclick="navigateTo('phones'); return false;">phones.</a>
+          </div>
+        </div>
+
+        <!-- experiences. -->
+        <div class="nav-item">
+          <button class="nav-dropdown-btn" type="button">
+            experiences. <span class="nav-caret">▾</span>
+          </button>
+          <div class="dropdown-menu">
+            <a href="#first-unofficial-voice-acting-experience" class="dropdown-link" data-route="first-unofficial-voice-acting-experience" onclick="navigateTo('first-unofficial-voice-acting-experience'); return false;">first unofficial voice-acting experience</a>
+          </div>
+        </div>
+
+        <!-- fantasizing tech. -->
+        <div class="nav-item">
+          <button class="nav-dropdown-btn" type="button">
+            fantasizing tech. <span class="nav-caret">▾</span>
+          </button>
+          <div class="dropdown-menu">
+            <a href="#wonders-of-cyberdecks" class="dropdown-link" data-route="wonders-of-cyberdecks" onclick="navigateTo('wonders-of-cyberdecks'); return false;">wonders of cyberdecks.</a>
+          </div>
+        </div>
+
+        <!-- shoughrts. -->
+        <div class="nav-item">
+          <button class="nav-dropdown-btn" type="button">
+            shoughrts. <span class="nav-caret">▾</span>
+          </button>
+          <div class="dropdown-menu">
+            <a href="#music-burnout" class="dropdown-link" data-route="music-burnout" onclick="navigateTo('music-burnout'); return false;">music burnout (11.5.2024)</a>
+          </div>
+        </div>
+
+        <!-- contact me. -->
+        <div class="nav-item">
+          <a href="#contact-footer" class="nav-link" onclick="document.getElementById('contact-footer').scrollIntoView({behavior:'smooth'}); return false;">contact me.</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Dynamic Content -->
+  <main id="app"></main>
+
+  <!-- Footer / Contact -->
+  <footer class="site-footer" id="contact-footer">
+    <div class="footer-inner">
+      <div class="footer-col">
+        <h4>email me:</h4>
+        <p><a href="mailto:iskandarafiqhafizuddin@gmail.com?subject=my%20email">iskandarafiqhafizuddin@gmail.com</a></p>
+      </div>
+
+      <div class="footer-col">
+        <h4>Instagram</h4>
+        <p><a href="https://instagram.com/alonecult" target="_blank" rel="noopener noreferrer">@alonecult</a></p>
+      </div>
+
+      <div class="footer-col">
+        <h4>TikTok</h4>
+        <p>(not really)</p>
+      </div>
+
+      <div class="footer-col">
+        <h4>Twitter/X</h4>
+        <p>(never)</p>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>©2023-2026 by iskandar afiq.</span>
+      <span>last edit: 16-11-2026</span>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

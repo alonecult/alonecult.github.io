@@ -1,0 +1,662 @@
+// Complete scraped content and router for iskandar afiq (alonecult.github.io)
+
+const PAGES = {
+  "home": {
+    title: "Home | iskandar afiq",
+    render: () => `
+      <section class="page-section">
+        <div class="hero-collage">
+          <div class="hero-left-stack">
+            <img
+              class="hero-main-photo"
+              src="https://static.wixstatic.com/media/f30f79_70ee856312d04baeb8fc9c2f5825f4bf~mv2.png"
+              alt="iskandar afiq looking down from staircase"
+            />
+            <div class="hero-scroll-prompt">
+              <div>
+                scroll down<br/>
+                to know<br/>
+                about <span class="red-word">him</span>
+              </div>
+              <img
+                class="red-star-arrow"
+                src="https://static.wixstatic.com/media/f30f79_16da3c54ba104bfcb65db6abc5366094~mv2.png"
+                alt="decorative red star and arrow"
+              />
+            </div>
+          </div>
+
+          <div class="hero-right-stack">
+            <div class="hero-secondary-photo-wrap">
+              <img
+                class="hero-secondary-photo"
+                src="https://static.wixstatic.com/media/f30f79_137958e93ad8440186a53179e1226b9c~mv2.png"
+                alt="iskandar afiq on staircase"
+              />
+              <a href="https://instagram.com/alonecult" target="_blank" rel="noopener noreferrer" title="@alonecult on Instagram">
+                <img
+                  class="pixel-smiley"
+                  src="https://static.wixstatic.com/media/f30f79_332d8993089e40c9b29f70cf3b544539~mv2.png"
+                  alt="pixel art smiley"
+                />
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="intro-statement">
+          <h1 class="typewriter-title">iskandar afiq is him<span class="red-dot">.</span></h1>
+          <p class="intro-sub">this is his website. nothing much. just his works. but, welcome though.</p>
+        </div>
+
+        <div class="about-grid" id="about-him">
+          <div class="about-text">
+            <h2 class="typewriter-title" style="font-size: 2.2rem; margin-bottom: 1.25rem;">
+              about <span class="red-accent">him</span>.
+            </h2>
+            <p>
+              while everyone else was named afiq iskandar, he was named iskandar afiq. iskandar afiq is a degree in creative writing student, currently trying to expand his skills and seek new challenging yet fun experiences. when he is not writing, you can find him sitting on his somewhat ergonomic chair, playing GTA. he drowns in it too.
+            </p>
+            <p>
+              sometimes, he writes lyrics when he's bored. just wanted you to know that. also, he writes poems now, though not often. another thing, he misses writing film scripts when he's in his degree. scriptwriting means a lot to him, ever since diploma.
+            </p>
+            <p>
+              another thing you should know, yes, he ADORES tech. he put way too much time on Mrwhosetheboss, Marques Brownlee, Linus Tech Tips, and other tech-related channels on YouTube (but now, perhaps less, though. he hates YouTube now).
+            </p>
+          </div>
+
+          <div class="about-photo-card">
+            <img
+              src="https://static.wixstatic.com/media/f30f79_70ca4adced1b4493a30805d64e425499~mv2.jpg"
+              alt="iskandar afiq portrait"
+            />
+          </div>
+        </div>
+
+        <div class="quote-banner">
+          <blockquote>
+            “fear is just a fragment of one’s imagination. use it and shape it into a story that could fear others.”
+          </blockquote>
+          <cite>- iskandar afiq</cite>
+        </div>
+
+        <div class="home-directory">
+          <h3 class="typewriter-title" style="font-size: 1.65rem;">explore the archive<span class="red-dot">.</span></h3>
+          <div class="directory-grid">
+            <div class="dir-card" onclick="navigateTo('my-scripts')">
+              <div>
+                <div class="dir-category">works.</div>
+                <div class="dir-title">my scripts sample.</div>
+                <div class="dir-desc">Chronological archive of 9 film, TV, radio drama, and stage play scripts from Diploma &amp; Degree.</div>
+              </div>
+            </div>
+            <div class="dir-card" onclick="navigateTo('anna')">
+              <div>
+                <div class="dir-category">works.</div>
+                <div class="dir-title">anna. (short story)</div>
+                <div class="dir-desc">Apocalyptic psychological sci-fi short story following Anna through a crumbling world and the Cylops.</div>
+              </div>
+            </div>
+            <div class="dir-card" onclick="navigateTo('sinister-roots-zine')">
+              <div>
+                <div class="dir-category">works.</div>
+                <div class="dir-title">sinister roots (zine)</div>
+                <div class="dir-desc">End-of-semester anthology zine exploring interconnected timelines grown from the same sinister tree.</div>
+              </div>
+            </div>
+            <div class="dir-card" onclick="navigateTo('audio-devices')">
+              <div>
+                <div class="dir-category">tech reviews</div>
+                <div class="dir-title">audio devices.</div>
+                <div class="dir-desc">Hands-on reviews of Baseus Bowie D03, Picun ANC-05L, Superlux HD681, EarFun Wave Pro, EarFun Tune Pro &amp; Koss KSC75.</div>
+              </div>
+            </div>
+            <div class="dir-card" onclick="navigateTo('phones')">
+              <div>
+                <div class="dir-category">tech reviews</div>
+                <div class="dir-title">phones.</div>
+                <div class="dir-desc">Initial and 1-month review of the Infinix GT 10 Pro (Dimensity 8050, XOS, and PS2 emulation).</div>
+              </div>
+            </div>
+            <div class="dir-card" onclick="navigateTo('first-unofficial-voice-acting-experience')">
+              <div>
+                <div class="dir-category">experiences.</div>
+                <div class="dir-title">voice-acting experience</div>
+                <div class="dir-desc">Live radio drama performances for Artvaluate 5.0 at UiTM Puncak Perdana: 1969 &amp; Spaghetti Bolognese.</div>
+              </div>
+            </div>
+            <div class="dir-card" onclick="navigateTo('wonders-of-cyberdecks')">
+              <div>
+                <div class="dir-category">fantasizing tech.</div>
+                <div class="dir-title">wonders of cyberdecks.</div>
+                <div class="dir-desc">Down the rabbit hole of vintage Toshiba Libretto 70ct laptops, The Reviiser, and r/cyberDeck.</div>
+              </div>
+            </div>
+            <div class="dir-card" onclick="navigateTo('music-burnout')">
+              <div>
+                <div class="dir-category">shoughrts.</div>
+                <div class="dir-title">music burnout (11.5.2024)</div>
+                <div class="dir-desc">Why new albums sit unplayed in our streaming libraries and the comfort zone of familiar playlists.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    `
+  },
+
+  "my-scripts": {
+    title: "my scripts sample. | iskandar afiq",
+    render: () => `
+      <section class="page-section">
+        <h1 class="typewriter-title">my scripts sample<span class="red-dot">.</span></h1>
+        <p class="intro-sub" style="margin-bottom: 2.5rem;">
+          here are a list of scripts (only a part of them) that i've written so far, in chronological order.<br/>
+          feel free to read them, thanks.
+        </p>
+
+        <div class="scripts-group">
+          <h2 class="scripts-group-heading">diploma:</h2>
+          <div class="script-list">
+            <div class="script-row">
+              <span class="script-name">MANIPULASI (short film).pdf</span>
+              <a class="download-btn" href="https://e4cd544f-634d-4057-9321-5c24cb3dc210.filesusr.com/ugd/f30f79_dfd19987235c48289569a5b89fcefe0d.pdf" target="_blank" rel="noopener noreferrer">download. ↗</a>
+            </div>
+            <div class="script-row">
+              <span class="script-name">KANCAH SIBER (radio drama).pdf</span>
+              <a class="download-btn" href="https://e4cd544f-634d-4057-9321-5c24cb3dc210.filesusr.com/ugd/f30f79_aa04af0ff009450a89c317af1f950a03.pdf" target="_blank" rel="noopener noreferrer">download. ↗</a>
+            </div>
+            <div class="script-row">
+              <span class="script-name">BERAT (tv drama).pdf</span>
+              <a class="download-btn" href="https://e4cd544f-634d-4057-9321-5c24cb3dc210.filesusr.com/ugd/f30f79_4c15da0d24be4d0c9fb5187bf42331bb.pdf" target="_blank" rel="noopener noreferrer">download. ↗</a>
+            </div>
+            <div class="script-row">
+              <span class="script-name">Whisker Wonders! - EP3 (tv writing for children).pdf</span>
+              <a class="download-btn" href="https://e4cd544f-634d-4057-9321-5c24cb3dc210.filesusr.com/ugd/f30f79_349a1f615078446c84f1e8b28c7bc4ef.pdf" target="_blank" rel="noopener noreferrer">download. ↗</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="scripts-group">
+          <h2 class="scripts-group-heading">degree:</h2>
+          <div class="script-list">
+            <div class="script-row">
+              <span class="script-name">Oh Maggi-Ku! (short musical film).pdf</span>
+              <a class="download-btn" href="https://e4cd544f-634d-4057-9321-5c24cb3dc210.filesusr.com/ugd/f30f79_bf66d3ebf5f24d7e80e66b00c3edb3c4.pdf" target="_blank" rel="noopener noreferrer">download. ↗</a>
+            </div>
+            <div class="script-row">
+              <span class="script-name">Untitled short film script.pdf</span>
+              <a class="download-btn" href="https://e4cd544f-634d-4057-9321-5c24cb3dc210.filesusr.com/ugd/f30f79_628f6f6447d7491d955671d9e6048ca8.pdf" target="_blank" rel="noopener noreferrer">download. ↗</a>
+            </div>
+            <div class="script-row">
+              <span class="script-name">HD799 (short story).pdf</span>
+              <a class="download-btn" href="https://e4cd544f-634d-4057-9321-5c24cb3dc210.filesusr.com/ugd/f30f79_9e890302f6934f02979f5c94f9f3ff60.pdf" target="_blank" rel="noopener noreferrer">download. ↗</a>
+            </div>
+            <div class="script-row">
+              <span class="script-name">Hikayat Ratu Kalinyamat (play script).pdf</span>
+              <a class="download-btn" href="https://e4cd544f-634d-4057-9321-5c24cb3dc210.filesusr.com/ugd/f30f79_a7747086d70d49ee9d933fd665a5134b.pdf" target="_blank" rel="noopener noreferrer">download. ↗</a>
+            </div>
+            <div class="script-row">
+              <span class="script-name">Badang (short story).pdf</span>
+              <a class="download-btn" href="https://e4cd544f-634d-4057-9321-5c24cb3dc210.filesusr.com/ugd/f30f79_abc4c523bb8241e9b21a3f63132d4eea.pdf" target="_blank" rel="noopener noreferrer">download. ↗</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    `
+  },
+
+  "anna": {
+    title: "anna. (short story) | iskandar afiq",
+    render: () => `
+      <section class="page-section">
+        <div class="story-container">
+          <h1 class="typewriter-title">anna<span class="red-dot">.</span></h1>
+          <div class="story-meta">short story · by iskandar afiq</div>
+
+          <div class="story-body">
+            <p>Anna kept running. She was gasping for air as she ran. Her lungs gave her a sign to stop and rest, but her mind said no. She had no choice. There was no turning back. She was in confusion as to what was chasing her. Her two friends got caught by the creature. They told her to run away as fast as she could and don’t look back. She wanted to help them, but it was too late as the unknown creature had already taken their lives before she could ever do anything. She knew that they were dead from the sound of their flesh that got blown up as she started running away from it. She tried her best not to look back and fight her curiosity as to what was behind her. Whatever chased her that time was malicious and delirious. No man could ever imagine the horrific features of the creature. The simplest way to describe it was it consisted of every human’s fears into one delightfully jaw-dropping and dreadful package. If anyone looked into its eyes, their eyes would pop out and their bodies would blow up to oblivion, leaving only gallons of blood, boneless as their bones melted, and dissolved with their blood.</p>
+
+            <p>The air was thick, polluted by the smoke from abandoned factories, fire from blown cars, and the smell of liquidized bodies on the road. It’s killing Anna as she breathed the polluted air, making her suffocate, interfering with her focus, and making her visions blurry. She felt helpless as there was nobody beside her. Nobody was around to save her from the pandemonium. She then covered her nose with her hands to lessen the pain in her nostrils and not give a chance for the air to seep through her brain. She kept running until there was no sound, only silence surrounded her. Thankfully, she lost it as the creature was distracted by an explosion that occurred near her current location. After a while, she felt safe and stopped running. She wanted to catch her breath, but because of the polluted air, she had to keep holding her nose. As she walked on the abandoned road, she then spotted a tunnel. It was dark and narrow, but it looked like a safe place to camp in for the day before the night caved in. She checked the tunnel for any hidden threats or if there was weird stuff lying in there. Luckily, there was none. Confident she was to stay there for the night as Delta Town was far away from there, and she needed enough rest to rejuvenate her stamina for the next day. She didn’t get any rest for a while. She needed the rest. She deserved it.</p>
+
+            <p>Mosquitoes flew on Anna’s face as she was still sleeping on her bloody blanket, making a lot of annoying buzzing sounds, but it didn’t bother Anna’s sleep. Until one of the mosquitoes decided to suck on Anna’s blood from her soft but smudged right cheek, and left an itch on it. Because of the itchiness, she was awoken from her sleep as she couldn’t bear the itchiness. She used her messed-up hands to scratch it to get rid of the itchiness to oblivion. She then recollected herself and observed her surroundings. She realized, it was already morning. It was also raining heavily with the sound from the rain and the storm overpowered the sound of the environment. Afraid she might get caught by the creature, she decided to keep on moving to her desired destination. She took the inland routes and avoided going through the main road as the creature wandered there a lot. Inland routes meant that she walked into the woods as she thought it was safe enough to go through there. It was quite peaceful in there for a while as there was nothing chasing after her. She walked at a slow pace to save her energy for the long journey that was up ahead.</p>
+
+            <p>While Anna was walking, she dug into her sling bag and took out her phone. She turned it on to see if there was any signal in there. Obviously, there wasn’t any reception in the woods. She put her phone back in her bag, but right as she was about to put it, there was a notification ding. She was shocked by the sound and immediately turned her phone back on. Somehow, there was a reception there. She was completely confused as to how that was possible. She then noticed that there was a message from her mother. It wasn’t the typical “How’s school today” type of message. Instead, it was a warning for her to leave the place as soon as possible and survive. Anna was more confused as to why her mother said that to her. Before she could even reply to her mother’s message, the line was cut and there was no reception again. Frustrated she was with the situation. She was left with more questions as to why everything happened and how it all happened. She was at loss. She then continued walking for hours and hours, and after a while, she realized that she was lost. The only thing that she saw around her were trees, identical to each other, giving her a hard time to backtrack her footsteps as her footsteps would disappear behind her.</p>
+
+            <p>Anna was in disbelief as to how it was possible for her footsteps to vanish behind her. She tried to make new footprints while walking backwards. She turned to her front for a split second and looked back. She was truly shocked to see that her footprints were vanishing in real-time. Tears then started dripping from her eyes as she was truly confused about everything and felt sad that this kind of fate befell her. An unfortunate fate. Everything happened too soon. Her mind was scrambled like an omelet. She felt hopeless and wanted to give up as there wasn’t anything else but trees that surrounded her, which made her more anxious than ever. She couldn’t think straight at all. She thought that she was hallucinating and that everything around her was a facade. Plus, the weather somehow got colder and made it even harder for Anna to keep on moving as she couldn’t stand the sudden coldness of the woods. The only thing that she could do was just sit in one place and hope that everything would just go back to normal the next day. She then sat under one of the trees, covered her whole trembling body with her bloody pillow to make herself feel warm enough, and forced herself to fall asleep to make the time pass by quickly.</p>
+
+            <div class="story-time-marker">Two days ago –</div>
+            <p>The sky was deep blue and the weather was sunny. Nothing new had happened that day. Everything was normal as usual. Anna woke up early in the morning and prepared for school as it was Friday, the last weekday before the weekends would roll in. She was ecstatic to go through her day. She jumped from the second floor of her house to the first floor through the stairs. Luckily, she didn’t roll herself down the stairs and injure herself. She was alert enough to her surroundings and managed to punch in the right combo for the right moves to land safely on the first floor. Her father saw her gesture and warned her of her dangerous actions as he was worried that she might injure herself in the future. Anna then went to her mother, kissed her cheek, and said her goodbyes as her father would send Anna to her school afterwards.</p>
+
+            <p>The distance between her home and her school was far, like really far out of town. It was an hour’s drive if there weren’t any traffic jams on the road. The school was Kohren International High School, one of the best in the country. She managed to get into the school with the help of her uncle as he was the principal there. Even though she got into it because she had a connection with someone there, she was still one of the best students there. She excelled in every single subject and in curricular activities. The teachers and students admired her a lot and made her a prime example for the school. But, everything would change that day as there would be a slight change in her usual routine and plans. Whatever she expected to happen that day were good things but instead, dreadful things would occur.</p>
+
+            <p>At first, everything seemed alright. Anna arrived at school on time as usual. She would kiss her father’s cheeks and her father would say to Anna to do her best at school as always. Her best friends, Jamie and Natalie would always wait for her at the front gate. She then went to her friends and they entered the school together. They would attend the school assembly, then go to their class, and learn as usual. Exactly at 4.30 pm when the Science class was about to start, something happened. Suddenly, the ground started shaking like crazy and everyone panicked, including Anna. The Science teacher thought that it was an earthquake, so he instructed everyone to calm down and take cover under the tables. Everyone obliged. It was weird that an earthquake would happen there as the country rarely encountered or experienced earthquakes in years. The last time it happened was 55 years ago. Everyone thought that it was just a coincidence for the earthquake to happen that day.</p>
+
+            <p>After three minutes of the ground shaking like crazy, it stopped. The whole school went silent for a moment. But just as the whole class was about to get up, the ground started shaking again, but this time, it was wilder than before. The Science class was on the third floor, so the impact wasn’t as wild as on the lowest floor. But it was still chaotic enough to make the whole floor shake. Everyone tried their best to stay still at their places, but to no avail, as the ground was shaking more violently every single minute. It was disastrous to the point where the floor started to crack and everyone was more concerned than ever. Then, the cracks started to get bigger and a small hole was formed. It started small but as the earthquake started to worsen, it grew bigger. The third floor which was once the safest floor became the most dangerous.</p>
+
+            <p>As the floor started to puncture more, everybody quickly went to the walls in the class and one by one, everybody went outside through the door and successfully went out, except for Anna. She almost made it to the door, but the floor in front of her cracked and had cut her path. If she wanted to get to the door, she had to jump as far as possible, but it was impossible as the way behind her was also cut, leaving only a small platform for her to step on. She couldn’t do a long jump because there was not enough space for her to do it. Her two friends that were already outside noticed that Anna wasn’t with them. They wanted to go back and save Anna, but it was too late as the door to the classroom was blocked by blocks of concrete.</p>
+
+            <p>Anna had nowhere to go as the floor was almost to none. She was traumatized by the situation and suddenly, she fainted and fell down. Before she hit the ground, something came to her. It was glowing brightly. She had a glimpse of what it was but what she only saw was light. A formless light. She saw it go into her skin and it seeped through her veins. She thought she was going to die a miserable death. Before she could ever feel anything, she blacked out. Her body was numb but her mind was still working. Anna was in a state of coma. Without her realizing, the light lifted her body before her head could collide with the ground and it flew her away from the destruction of the school building. It then safely landed her body on the school field. She had only a few scratches on her left arm, but her overall condition was still fine. She was saved by an unknown entity that silently lived in her mind.</p>
+
+            <p>Anna then woke up on the school field. She felt nauseous and had a headache. She scanned her surroundings and once she realized that she was on the field, she jumped as she was shocked as to how she was able to get there. The last thing that she remembered was when she was about to die from falling from the third floor. She couldn’t comprehend what just happened to her. Her other classmates and her Science teacher had spotted her when they were on their way to exit the school. All of them were shocked too, including Jamie and Natalie. They were worried about her. They asked Anna how she got there, but Anna couldn’t answer their question as she too didn’t know what had happened to her, but it sure was a miracle, even though she didn’t anticipate it.</p>
+
+            <p>The school was completely destroyed, but everyone managed to get out. There were a few injured, but luckily no casualties were detected. Everyone felt safe for a while. They thought that the chaos had ended, or so they thought. Just when they were about to leave, the ground was shaking again, but this time, the earth was opening its mouth. Some of the students and teachers fell into the gaping hole, left to die as nobody saw it coming. All of them remaining then quickly ran as fast as they possibly could and drained most of their stamina just to save themselves from the literal hellhole. While they were running, something came out of the gaping hellhole, but none of them saw what it was as they were already far ahead and didn’t look back at all. Even though they felt exhausted, they didn’t have the privilege to stop running. They had to force themselves to push through their limits in order to survive. Before the chaos, there were 400 people in the school, but because of the recent catastrophe, there were only 340 left.</p>
+
+            <p>The sky was getting dark. Everyone was exhausted as they had run for an hour straight without stopping. They slowed their pace as their surroundings were calm again. One of the teachers that survived, Mr. Oliver had spotted an abandoned building that was abandoned for about 60 years and somehow, it was still standing tall after years of its existence. He then escorted all of the students with the help of the other teachers, including the principal, to the abandoned building to camp out for the night, but instead of camping outdoors, they camped indoors. It wasn’t the typical school camping experience. The place was more like a refuge for refugees. It was big enough for all of them to stay, even though it was smelly and grimy.</p>
+
+            <p>As the others chose their spots to sleep at, Anna looked outside through the glassless window. Outside was grim and gloomy. She didn’t expect all of the chaos to unfold in front of her. Truly shocked she was after the near-death moment that she had experienced. She also felt sad that everything didn’t turn out the way she wanted to like the days before. Anna cried. She missed her home and her parents so much. She didn’t want all of this to happen. Jamie and Natalie saw her crying and comforted her, making her feel calm again. Anna then took her spot beside her two best friends and slept.</p>
+
+            <div class="story-time-marker">One day ago –</div>
+            <p>The sun was up and everyone was still sleeping as they were really tired from running yesterday, except for Anna. She woke up early as she was used to it since she was little. It was now Saturday. The gloominess of yesterday continued to today as the sky wasn’t as blue as yesterday morning. She took her phone out of her bag and checked for any missed calls but there was no service to receive any calls or call someone. She then opened the gallery app to look at photos of her past and reminisce about the good times that she had with her family. Her heart couldn’t hold back her longing for her parents. She missed them too much.</p>
+
+            <p>Suddenly, a sound appeared. A weird and peculiar sound. Anna was surprised the moment she heard the sound. It didn’t sound human at all. It sounded like a dragon’s growl, but less magnificent and more haunting. It was an unexpected visit from it. She didn’t have the guts to turn around as she had a sense, somewhat of a tingle like Spider-man. She could detect the thing from meters away. Her heart was beating faster than ever before as she was anxious and afraid of whatever was behind her. She tried to calm herself down and be silent for the rest of the time that it was there. Her two friends that were sleeping beside her didn’t notice the thing. In fact, nobody did. Only Anna sensed its presence.</p>
+
+            <p>Then, one of the students woke up from his sleep and made a yawning noise. Because of that, the thing came running at the student at a blazing speed and grabbed him by the throat. The student then yelled for help but before anyone could ever help him, his whole body exploded and turned into liquid as soon as he looked into the creature’s eyes. The person that slept beside him was awakened by the sound of his mate’s exploded body. She then noticed the creature and then, the creature would quickly grab her throat and did the same thing to her. And with its cold stare into her eyes, she immediately exploded to oblivion, leaving nothing but a gallon of her liquidized body. Anna woke her two friends up and told them to take cover somewhere.</p>
+
+            <p>More people had awakened from their sleep and heard the sound of the explosion of the girl’s body as it was loud. Everyone was terrified by the thing and panicked. They ran around the building as they tried to protect themselves from the creature. But the creature was fast enough to do its job. It killed people after people in a matter of minutes. After only five minutes, the creature had killed more than 250 people that were there. The ones that still survived after the mass killing had taken cover on the other side of the building as there was a hidden room that was covered by a piece of wood. It didn’t take long for the creature to discover their hiding place. They were also killed by the creature with no mercy and it left nothing but puddles of blood in there. Nobody was left alive.</p>
+
+            <p>Anna and her two friends were hiding somewhere else, somewhere more dangerous than any other place, behind an old desk. Jamie and Natalie were petrified and couldn’t calm down. Anna tried her best to keep their friends calm as she sensed that the creature was getting closer to them. They could hear it growling uglily beside the table. Natalie wanted to scream but Anna and Jamie closed her mouth shut with their hands to contain her scream. Then, the creature lifted the table and threw it away from them. They were exposed to it. The creature then held Jamie and Natalie by their necks. Both of them tried their best to not look at it and tried to resist it. They tried kicking it but to no avail. Nothing worked. Anna even tried her best to distract it while not looking directly at it, but it didn’t work either as the creature was focused on her two friends. They then told Anna to run away as fast as possible while she got the chance as they couldn’t do anything else but sacrifice themselves for it. Anna hesitated at first but she knew that it wasn’t worth it if she had stayed. She had to leave them without any goodbyes. She could cry for them but her tears wouldn’t save them. It was hopeless.</p>
+
+            <div class="story-time-marker">Today –</div>
+            <p>Anna was awakened from her sleep, but to her surprise, she woke up somewhere else. She wasn’t in the forest anymore. She was in a white room. Everything around her was white. That was all she could see, the color white. She felt the walls as she tried to find a door but there wasn’t any. For some reason, she became pissed. She was angry about everything that happened to her. It was unfair. Because of her uncontrollable anger, she produced a raw power that obliterated the walls to unveil a group of people that was observing her from afar. She was surprised by what she saw and passed out.</p>
+
+            <p>At that time, she was held in a secret facility in the middle of nowhere. The place was unknown to anybody in the world, not even the government. It was like Area 51, but not for observing aliens and confiscating UFOs, but instead it was specialized in researching people that were chosen by the light. Everything that happened in Anna’s life was a simulation that involved a lot of people, including her friends. They were born and raised in a fake and fabricated reality. The creatures that attacked them were called Cylops, programmed to kill people who weren’t chosen by the light. Anna was the most successful candidate among other failed candidates. She was different from anybody else there. She was the chosen one.</p>
+          </div>
+        </div>
+      </section>
+    `
+  },
+
+  "sinister-roots-zine": {
+    title: "sinister roots (zine sample) | iskandar afiq",
+    render: () => `
+      <section class="page-section">
+        <div class="sinister-banner">
+          <h1>sinister roots.</h1>
+          <p>
+            this is a zine that i made for my end of semester assignment. the concept behind this anthology is to show that different events are happening in the same timeline. <em>sinister roots</em> also indicate the separate roots represented by the short stories came from the same tree, that is, the sinister itself.
+          </p>
+        </div>
+
+        <div class="zine-showcase">
+          <div>
+            <img
+              class="zine-cover"
+              src="https://static.wixstatic.com/media/f30f79_514b4577916f4831b00dbb6327a63f5f~mv2.jpg"
+              alt="sinister roots zine front cover"
+            />
+          </div>
+          <div>
+            <h2 class="typewriter-title" style="font-size: 1.85rem;">sinister roots.pdf</h2>
+            <p style="font-family: var(--font-sans); color: var(--text-muted); margin-bottom: 1rem;">
+              below is the front cover of the zine, and the download link.
+            </p>
+            <div class="warning-box">
+              i warn you, there is some disturbing imagery in the zine, so proceed with caution.
+            </div>
+            <p style="font-family: var(--font-mono); margin-bottom: 0.75rem;">anyways, enjoy.</p>
+            <p style="font-family: var(--font-mono); font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.75rem;">
+              p/s: this is just a sample. not the full thing.
+            </p>
+            <a
+              class="download-btn"
+              href="https://e4cd544f-634d-4057-9321-5c24cb3dc210.filesusr.com/ugd/f30f79_04512ee19c554cd68a25870c15b44d70.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              download sinister roots.pdf ↗
+            </a>
+          </div>
+        </div>
+      </section>
+    `
+  },
+
+  "audio-devices": {
+    title: "audio devices. | iskandar afiq",
+    render: () => `
+      <section class="page-section">
+        <div class="story-meta">tech reviews</div>
+        <h1 class="typewriter-title">audio devices<span class="red-dot">.</span></h1>
+        <p class="intro-sub">
+          here are my reviews on some headphones and earphones, whether they have Bluetooth or not.<br/>
+          <span style="font-size: 0.9rem; opacity: 0.8;">note: some of these i initially wrote in the Shopee reviews section, but i put them here as well.</span>
+        </p>
+
+        <div class="reviews-stack">
+          <!-- 1. Baseus Bowie D03 -->
+          <article class="review-card image-left">
+            <div class="review-media">
+              <img src="https://static.wixstatic.com/media/f30f79_31ce83972fbc41c7b942f8193ef04ac0~mv2.jpg" alt="Baseus Bowie D03" />
+            </div>
+            <div class="review-content">
+              <div class="review-header">
+                <h2 class="review-title">⬅️ Baseus Bowie D03</h2>
+                <span class="review-score-badge">overall: 6/10</span>
+              </div>
+              <div class="review-tldr">
+                <strong>Quality:</strong> it’s alright<br/>
+                <strong>Performance:</strong> decent enough for the price. not the highest fidelity. depends on what kind of app you use. bass is strong when at 30% volume.
+              </div>
+              <p><strong>the bass:</strong> stronger than i had anticipated when at 30% volume and above.</p>
+              <p><strong>the sound quality:</strong> about 6.5/10. it’s alright. in between Sonicgear’s Airphone 6 and Edifier’s Hecate wired gaming headphone (base model).</p>
+              <p><strong>the comfort level:</strong> 6.5-7/10. definitely more comfortable than the Airphone 6. the earpads could’ve been thicker and bigger, but it’s alright. it depends on how big your head is. my head is big and it fits alright, just had to adjust it to make it a bit longer.</p>
+              <p><strong>overall: 6/10.</strong> it’s alright. sorry if i seem biased from the score that i gave. it’s just what i’ve felt with this headphone.</p>
+            </div>
+          </article>
+
+          <!-- 2. Picun ANC-05L -->
+          <article class="review-card">
+            <div class="review-content">
+              <div class="review-header">
+                <h2 class="review-title">Picun ANC-05L ➡️</h2>
+                <span class="review-score-badge">overall: 7/10</span>
+              </div>
+              <div class="review-tldr">
+                <strong>Performance:</strong> sound quality is decent, ANC is fine sometimes<br/>
+                <strong>Quality:</strong> pretty high quality
+              </div>
+              <p><strong>Build quality: 8/10.</strong> i think it resembles some of the more expensive headphones. it feels good. i also love that it folds up nicely and is really portable.</p>
+              <p><strong>Comfort and fit: 9/10.</strong> pretty comfortable because of how soft the earpads and the headpad are. it fits my head pretty well, though i have to adjust it a bit to make it comfortable enough to wear. (i got a massive head). i’m able to wear this comfortably for hours. it’s that comfortable.</p>
+              <p><strong>Battery life: 9/10.</strong> it lasts pretty long. ever since i got it 3 days ago, the battery is still at 70% (out of the box, it was at 80%). with ANC on and 25-30% volume, it still is holding up pretty well.</p>
+              <p><strong>Sound: 7/10.</strong> it’s definitely bassy, especially when at 30%+ volume. it doesn’t sound the widest, but it’s still enjoyable to listen to. the clarity is there, though not that much but still good enough. i’d say they sound almost as good as Edifier’s P180 earphones, but more bass. easy to say, this headphone is not audiophile, but it’s fun to listen to.</p>
+              <p><strong>ANC mode: 6/10.</strong> this is my main gripe of this headphone. it blocks 50-60% of noise, which is okay, but the thing that’s been bothering me ever since i got it a few days ago was that when i turned on the ANC, it would make a crackling sound, only on my first day of using it. it would be so discomforting that i had to turn off the ANC to save my ears from that crackling sound. i don’t know if it’s normal or that i got a defective product, but that problem persisted until now, sadly. at least, that crackling sound is gone when i turn off the ANC mode.</p>
+              <p><strong>overall: 7/10.</strong> it’s a good wireless headphone with decent audio quality, but has mediocre ANC.</p>
+            </div>
+            <div class="review-media">
+              <img src="https://static.wixstatic.com/media/f30f79_e8f0117d95dd400daf57dc01c196a531~mv2.webp" alt="Picun ANC-05L" />
+            </div>
+          </article>
+
+          <!-- 3. Superlux HD681 -->
+          <article class="review-card image-left">
+            <div class="review-media">
+              <img src="https://static.wixstatic.com/media/f30f79_9da7f6292032495e88444e342b821bfc~mv2.jpg" alt="Superlux HD681" />
+            </div>
+            <div class="review-content">
+              <div class="review-header">
+                <h2 class="review-title">⬅️ Superlux HD681</h2>
+                <span class="review-score-badge" style="background: #333;">in progress</span>
+              </div>
+              <p style="font-family: var(--font-mono); color: var(--text-muted);">testing it right now. stay tuned...</p>
+            </div>
+          </article>
+
+          <!-- 4. EarFun Wave Pro -->
+          <article class="review-card">
+            <div class="review-content">
+              <div class="review-header">
+                <h2 class="review-title">EarFun Wave Pro ➡️</h2>
+                <span class="review-score-badge">overall: 7.5 - 8/10</span>
+              </div>
+              <div class="review-tldr">
+                <strong>Quality:</strong> overall, pretty good for this price range<br/>
+                <strong>Performance:</strong> tldr: neutral sounding, good battery life, good ANC, decent build quality, free case, meh transparency, meh wired audio quality.
+              </div>
+              <p>this is the first time i’m using a rm250+ wireless headphones. been using it for a few days. here are my thoughts:</p>
+              <p><strong>1. build quality: 7.5/10.</strong> honestly, coming from the Picun ANC-05L, i kinda expected more here. i would say that i prefer the Picuns as they are built better and the finish felt a bit better with that somewhat rubbery feeling to the touch. at least, there’s a free headphone case tho. that’s a nice thing to include in the box.</p>
+              <p><strong>2. comfort: 8.5/10.</strong> these are super comfortable. definitely more comfortable than the Picuns. the memory foam ear pads and the head cushion are super soft, so i can definitely use these for more than an hour, especially in a cold environment. despite that, my ears do get hot after wearing them for a while because of pleather ear pads. plus, i have hyperhidrosis, so it’s easy for me to sweat in these headphones.</p>
+              <p><strong>3. ANC mode: 7.5/10.</strong> it’s really strong when you use the ‘Strong ANC’ mode in the EarFun App (yes you have to download the app to choose other ANC modes). i would say that it’s way stronger than the Picuns as it blocks a lot of noise, even though it doesn’t block the announcement voice when on a train. i’d say that it blocks out 75-80% of noise when using the ‘Strong ANC’ mode. still, i think it’s a major step up from the Picuns.</p>
+              <p><strong>4. Transparency mode: 5.5 or 6/10.</strong> i’m kinda on the fence here. on one hand, it works. on the other hand, not so much. i think it’s just there as a bonus feature. don’t get me wrong, it works, but it doesn’t sound natural and the amplified sounds around you pierces through your ears, so not recommended for long time use. also, not great for talking with others around you. it’s better to just remove your headphones to talk.</p>
+              <p><strong>5. battery life: 8/10.</strong> it’s pretty solid. 30-40% volume with ‘Wind-Reduction mode’ on, with an average of 4 hours of usage daily, it lasts pretty long. out of the box, it was 90%, and 4-5 days later, the battery sits at 60%, which is really nice. i think these can still last for another week. loving it.</p>
+              <p><strong>6. wireless sound: 8/10.</strong> these have ‘Hi-Res Wireless’, so of course, i expected them to sound good. soo, out of the box (no EQ), it sounds really natural for a pair of wireless headphones, regardless of which codecs used (i typically use the AAC codec as my iphone only supports that) and yet, it sounds really good. sure, it doesn’t have a wide soundstage, but the bass is clean and not overpowering, the clarity is also really good, like overall, it sounds clean. but, do note that these are not bass heavy, so not recommended for the ones that prefer a lot of bass as the bass do not hit that hard (you can try to EQ in the app if you want).</p>
+              <p><strong>7. wired sound (thru AUX cable): 5.5 or 6/10.</strong> i’d say it’s pretty much the same as the transparency mode, just a bonus feature. it sounds really boomy and boxed in. not wide-sounding. at least the clarity is somewhat there. i’m gonna take the ‘Hi-Res’ badge with a grain of salt next time i buy wireless headphones.</p>
+              <p><strong>overall: 7.5 or 8/10.</strong> i like these headphones, despite some of the shortcomings in terms of the build quality, the transparency, and the wired sound quality. still, everything else is solid. good job on your first pair of ANC headphones, EarFun!</p>
+            </div>
+            <div class="review-media">
+              <img src="https://static.wixstatic.com/media/f30f79_ea61e0ffa165437daa92c8387c433b4a~mv2.png" alt="EarFun Wave Pro & Tune Pro" />
+            </div>
+          </article>
+
+          <!-- 5. EarFun Tune Pro -->
+          <article class="review-card image-left">
+            <div class="review-media">
+              <img src="https://static.wixstatic.com/media/f30f79_ea61e0ffa165437daa92c8387c433b4a~mv2.png" alt="EarFun Tune Pro vs Wave Pro" />
+            </div>
+            <div class="review-content">
+              <div class="review-header">
+                <h2 class="review-title">⬅️ EarFun Tune Pro</h2>
+                <span class="review-score-badge">overall: 8.5/10</span>
+              </div>
+              <div class="review-tldr">
+                <strong>Quality:</strong> pretty decent<br/>
+                <strong>Performance:</strong> tldr: decent build quality, decent comfort, awesome battery life, great sound (wired &amp; wireless), good ANC, solid transparency. 8.5/10
+              </div>
+              <p>i’ve tested the EarFun Tune Pro (left of first picture) and compared them to the EarFun Wave Pro (right of first picture). here are my thoughts:</p>
+              <p><strong>build quality:</strong> 9/10 for the earcups, 6.5/10 for the yokes and the headband. honestly, i prefer the more plush headband and the more trustworthy yokes on the EarFun Wave Pro, but i do like that the EarFun Tune Pro doesn’t have that ‘clack’ sound when shaking them by hand. still, i think the build quality is decent enough, just that you have to be extra careful when handling them.</p>
+              <p><strong>portability: 9/10.</strong> these headphones can fold. that’s good for bringing them everywhere you go. just that there isn’t a hardshell case included, unlike the Wave Pro. still, you can buy a cheap third-party hardshell case for rm20.</p>
+              <p><strong>battery life: 10/10.</strong> haven’t been able to kill the battery for almost a month now. sure, i don’t use it too often, but i did try to use it as much as possible, and yeah it’s so much better than the Wave Pro (which is still solid btw).</p>
+              <p><strong>comfort: 8/10.</strong> when i first used the Tune Pro, they were comfortable but not for long as the headband gives a tight pressure on my ears. after using them for a while, the headband somewhat loosened and i can wear them for longer now. nonetheless, i still prefer the comfort on the Wave Pro, despite being a bit looser and having less pressure, resulting in the headphones sliding from my head sometimes when i tilt my head up and down.</p>
+              <p><strong>ANC: 7.8/10.</strong> i’d say that it’s a slight improvement over the Wave Pro as i could hear less of my environment (it cancels more noise, but not by much). both of them are somewhat comparable. you can still hear faint sounds of people talking around you, but really faint. so that’s a good thing.</p>
+              <p><strong>transparency: 8/10.</strong> this is where there is a massive gap in terms of performance when compared to the Wave Pro. the transparency on the Tune Pro is so much better as i can hear my surroundings better. your voice might still be slightly muffled, but nonetheless, it’s much much much more usable than the Wave Pro. the Wave Pro’s transparency is too sibilant, and they amplify the sounds that are further from you, not whatever’s close to you, which makes them pointless if you want to have a conversation with anyone sitting beside you.</p>
+              <p><strong>wireless sound (bluetooth): 7.8/10.</strong> the Wave Pro with their LDAC codec does give them more resolution compared to the Tune Pro with just AAC. bass is noticeably less than the Wave Pro (which i like), instruments sound like how they should sound, and imaging is good, but the soundstage is slightly narrower than Wave Pro. also, the resolution is slightly less than the Wave Pro. still, the Tune Pro sounds really good overall at this price point.</p>
+              <p><strong>wired sound (aux and type c): 8/10.</strong> no question, these are better than the Wave Pro. vocals and instruments sound closer to my head and more intimate, but they are really clear. imaging is pretty good too. when talking about the Wave Pro, yeah their “Hi-Res Wired” certification is negligible as they sound really muffled and just bad, petrol station headphones bad. i’m glad that EarFun made the “Hi-Res Wired” certification on the Tune Pro mean something more than just a badge. again, Tune Pro sounds good wired.</p>
+              <p><strong>using ANC &amp; transparency with aux in or type c in: 10/10.</strong> it just works. when i left them on, and plug a cable in, the ANC &amp; transparency still works, so that’s really cool.</p>
+              <p><strong>overall: 8.5/10.</strong> really loving this. so much better than the Wave Pro.</p>
+            </div>
+          </article>
+
+          <!-- 6. Koss KSC75 -->
+          <article class="review-card" style="grid-template-columns: 1fr;">
+            <div class="review-content">
+              <div class="review-header">
+                <h2 class="review-title">Koss KSC75 ➡️</h2>
+                <span class="review-score-badge">overall: 7.5/10</span>
+              </div>
+              <div class="review-tldr">
+                <strong>Performance:</strong> solid. great sound. okay price.<br/>
+                <strong>Quality:</strong> cheap but alright
+              </div>
+              <p>could’ve been cheaper judging by the quality of the not-headphones, like perhaps around RM90-100, but at least i managed to get them for less than the retail price, around RM135.</p>
+              <p><strong>build quality: 5/10.</strong> the thin cables don’t guarantee long-term sustainability if i’m more rough with them, so i have to be careful. definitely recommended to do the detachable cables mod to make them last longer. additionally, i do like the design, distinct and interesting.</p>
+              <p><strong>sound quality: 8.5/10.</strong> not the clearest and most detailed, but damn, the soundstage is wideee and the tuning is real good. like legit the best that i’ve experienced yet. it has a bit of bass but not much, which i like. imaging is also solid. instruments and vocals sound clear. definitely a good starting point or endgame for those who want to dip their toes into the audiophole hobby.</p>
+              <p><strong>overall: 7.5/10.</strong> loving them so far. whenever i get the chance, i’ll do the detachable cables mod on them.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+    `
+  },
+
+  "phones": {
+    title: "phones. | iskandar afiq",
+    render: () => `
+      <section class="page-section">
+        <div class="story-meta">tech reviews</div>
+        <h1 class="typewriter-title">phones<span class="red-dot">.</span></h1>
+        <p class="intro-sub">here are my reviews on some phones. if i got the budget, i'll review it.</p>
+
+        <div class="reviews-stack">
+          <article class="review-card">
+            <div class="review-content">
+              <div class="review-header">
+                <h2 class="review-title">Infinix GT 10 Pro</h2>
+                <span class="review-score-badge">overall: 6/10</span>
+              </div>
+              <div class="review-tldr">
+                <strong>Initial review:</strong><br/>
+                <strong>Performance:</strong> pretty good, except for xos. but i’m willing to look past that<br/>
+                <strong>Quality:</strong> plastic but feels nice<br/>
+                glad i got this on the payday sale for rm778. love this phone already. can’t wait to try gaming on it.
+              </div>
+
+              <h3 class="typewriter-title" style="font-size: 1.35rem; color: var(--red); margin: 1.5rem 0 0.75rem;">Updated Review:</h3>
+              <p>i’ve used it for almost a month. here are some things that i want to nitpick about this phone:</p>
+              <p><strong>rear camera:</strong> not really 108mp, more like 16/32mp. but i’ve already expected this. as always, lower your expectations when it comes to buying a budget gaming device like this.</p>
+              <p><strong>operating system:</strong> the XOS is not that great across the board, especially the little things like bottom padding, and general gestures. it is a bit buggy, but maybe it’ll get fixed in the next software update.</p>
+              <p><strong>performance:</strong> the Dimensity 8050 chipset is a beast, mostly on android mobile games, especially online competitive games like PUBG and COD. but it’s not the greatest when it comes to emulation, specifically Aethersx2 (PS2 Emulator). Some games with run smoothly without any custom settings needed, but others might need some tweaking to make it run smoothly or at least, be playable. Games like Silent Hill 2, Silent Hill 3, Silent Hill 4, and Urban Reign ran pretty well (it depends on what version of Aethersx2 you installed. i installed the Nethersx2).</p>
+              <p><strong>custom rom compatibility:</strong> because of the Dimensity 8050 (made by Mediatek), there’s barely any custom roms available for it. so, i can’t just simply install one because of how i dislike XOS, but there is no other choice but to keep using XOS. who knows, maybe Mediatek will come to their senses and finally release their kernels to the masses so that custom roms can be made for Mediatek devices. i can only hope for now.</p>
+              <p><strong>overall: 6/10.</strong> not bad, Infinix. not bad.</p>
+              <p style="font-family: var(--font-mono); color: var(--text-muted); margin-top: 1.5rem;">more phones coming soon when i have budget...</p>
+            </div>
+            <div class="review-media">
+              <img src="https://static.wixstatic.com/media/f30f79_d295e7a43d324f9f9b3e6237acea57af~mv2.webp" alt="Infinix GT 10 Pro" />
+            </div>
+          </article>
+        </div>
+      </section>
+    `
+  },
+
+  "first-unofficial-voice-acting-experience": {
+    title: "first unofficial voice-acting experience | iskandar afiq",
+    render: () => `
+      <section class="page-section">
+        <div class="story-container">
+          <div class="story-meta">experiences.</div>
+          <h1 class="typewriter-title">my first unofficial voice-acting experience<span class="red-dot">.</span></h1>
+
+          <div class="story-body">
+            <p>Voice-acting has been something I was always interested in since I was a kid. It’s also a knack of mine. When I first discovered I could imitate the voice of the famous Suneo Honekawa from Doraemon, I knew that voice-acting was something I wanted to pursue in the future.</p>
+
+            <p>Which was why I didn’t decline when my classmates (or coursemates, to be precise) asked me to do voice-acting for the live radio drama performance for Artvaluate 5.0, held at UiTM Puncak Perdana on July 14, 2022.</p>
+
+            <div class="feature-figure">
+              <img src="https://static.wixstatic.com/media/f30f79_3cdd107b3d5448158aafe48789b9b7c6~mv2.webp" alt="Artvaluate 5.0 Radio Drama" />
+            </div>
+
+            <p>We had radio drama class this semester, and three selected radio dramas were to be performed live. I was involved in two. The first radio drama I was involved in was <em>1969</em>, a radio drama about a man from 2020 accidentally being transported to 13 May 1969, where the events of the racial riots happened.</p>
+
+            <p>I voiced the character Rahim, a police officer who helped the main character escape. I had to skip 30 years and turn into a 40-year-old man. It was challenging, but fun nonetheless.</p>
+
+            <p>You can catch my performance of Rahim in <em>1969</em> here (click on the image). I’m the guy in the middle:</p>
+
+            <a class="video-link-card" href="https://www.youtube.com/watch?v=oGE40MU-jSM" target="_blank" rel="noopener noreferrer">
+              <img src="https://static.wixstatic.com/media/f30f79_a487a199ae284fd7956501cf6c8fc079~mv2.webp" alt="Rahim in 1969 live radio drama performance" />
+              <span class="video-play-badge">▶ Watch 1969 on YouTube</span>
+            </a>
+
+            <p>The second radio drama I was involved in was called <em>Spaghetti Bolognese</em>, a radio drama about a little boy trying to get the ingredients to make spaghetti bolognese.</p>
+
+            <p>I voiced the character of Uncle David, an Indian, as non-Bumis do not attend our university. It was personally hard for me to channel Uncle David’s accent and tone as I am a Malay and I do not want to offend any Indians or stir any racial controversies. While it was fun to voice Uncle David, I was actually scared.</p>
+
+            <p>You can watch Uncle David in <em>Spaghetti Bolognese</em> here (click on the image). I’m the guy in the flannel:</p>
+
+            <a class="video-link-card" href="https://www.youtube.com/watch?v=w42BHMPG4xU&t=2s" target="_blank" rel="noopener noreferrer">
+              <img src="https://static.wixstatic.com/media/f30f79_567358f73fdf410cb71f2bade5f1efc0~mv2.jpg" alt="Uncle David in Spaghetti Bolognese live radio drama performance" />
+              <span class="video-play-badge">▶ Watch Spaghetti Bolognese on YouTube</span>
+            </a>
+
+            <p>Overall, it was a really fun experience. Although it wasn’t really something official, I finally got to experience something I was always interested in. I hope to be involved in actual voice-acting in the studios someday.</p>
+          </div>
+        </div>
+      </section>
+    `
+  },
+
+  "wonders-of-cyberdecks": {
+    title: "wonders of cyberdecks. | iskandar afiq",
+    render: () => `
+      <section class="page-section">
+        <div class="story-container">
+          <div class="story-meta">fantasizing tech.</div>
+          <h1 class="cyber-heading">the wonders of cyberdecks.</h1>
+
+          <div class="story-body">
+            <p>It was a few days ago. I was lying on the bed, scrolling through Instagram, when a post of a vintage Toshiba Libretto 70ct came into the feed and stole my attention. The design was old, but somehow refreshing and delightful to look at. It was aesthetically pleasing to me.</p>
+
+            <div class="feature-figure">
+              <img src="https://static.wixstatic.com/media/f30f79_2db1e3e317c14d26a1c251253c0c0ed4~mv2.jpg" alt="Toshiba Libretto 70ct" />
+              <div class="feature-caption">
+                Toshiba Libretto 70ct (instagram: <a href="https://www.instagram.com/p/CwSojQpIBOv/?igshid=MzRlODBiNWFlZA==" target="_blank" rel="noopener noreferrer">necrohardware</a>)
+              </div>
+            </div>
+
+            <p>And I thought to myself, "Is it possible to get one of those and upgrade them in any way?" because I'm not a huge fan of the old Windows 98 experience and prefer Windows 10. So, I searched across the internet, looking for ways to build one myself, even though I'm broke. well, I guess it wouldn't hurt knowing how much it would cost me to make such of contraption.</p>
+
+            <p>Then, a picture popped out of the Google Images search results. It was some sort of a device that had a distinctive look, different than anything that I had seen. It looked modern and vintage at the same time. Somewhat cyberpunk-y.</p>
+
+            <div class="feature-figure">
+              <img src="https://static.wixstatic.com/media/f30f79_8b43cb0882054ceb9aa42ba624bf28a5~mv2.jpg" alt="The Reviiser 3D printed Raspberry Pi cyberdeck" />
+              <div class="feature-caption">
+                The Reviiser. (Source: <a href="https://htxt.co.za/2020/02/11/the-reviiser-is-a-3d-printed-raspberry-pi-cyberdeck/" target="_blank" rel="noopener noreferrer">hypertext</a>)
+              </div>
+            </div>
+
+            <p>Because of an undying fascination, I went down a rabbit hole of custom-made machines on Google Images until I eventually found <strong>r/cyberDeck</strong> on Reddit. In the subreddit, there was a large amount of following sort of like a futuristic cult, with its users posting cyberdecks that they've created.</p>
+          </div>
+        </div>
+      </section>
+    `
+  },
+
+  "music-burnout": {
+    title: "music burnout (11.5.2024) | iskandar afiq",
+    render: () => `
+      <section class="page-section">
+        <div class="story-container">
+          <div class="story-meta">shoughrts.</div>
+          <h1 class="typewriter-title">music burnout (11.5.2024)</h1>
+
+          <div class="story-body">
+            <p>The title sounds weird, right? 'Music' and 'burnout' in the same sentence? It is a term (that I made up) for a phenomenon that overwhelms one’s desire to listen to music that has been on their 'To Listen' or 'Listen Later' playlist or in their music streaming library. Of course, it’s not really a phenomenon as I’m the only one experiencing this, maybe.</p>
+
+            <p>For example, when Olivia Rodrigo released her 'GUTS' album last year, I was ecstatic to listen to it and decided to add it into my Apple Music library. Months later, I still have not listened to that album until now (except for a few tracks like All-American B****, Bad Idea Right?, and Love Is Embarassing which are bangers. It was my girlfriend's fault). The album has always been in the depths of my music library, waiting to be unearthed and discovered.</p>
+
+            <p>One factor might be that I always expect to give a score after I listen to any form of music, albeit an album, or a song, and I'm afraid to give a bad score instead of just enjoying the music, whether it be good or bad. Because of this, I'm scared to discover new music and always stay in the comfort zone (familiar music, repeating the same playlists). I would only add new music that YouTube recommended to me or from my brother’s playlist.</p>
+
+            <p>Another factor is that there’s just too much new music to keep up with nowadays, including new movies, TV shows, and games to the point where new interesting music gets abandoned. The fact is, I love music as much as I love films, sometimes even more than anything else.</p>
+
+            <p><em>(takde geng nak dengar album yang i alone want to listen to, sometimes rasa tak semangat nak dengar album tu, jadinya tak terdengar.)</em> It’s always fun to listen to new music with people that I love, but they have different tastes in music</p>
+
+            <p>The only way to enjoy new music is to just put everything else on hold and force myself to focus on the music that I already got in my music library. I sure hope that I can keep up with the dozens of abandoned music. Wish me luck.</p>
+
+            <div class="feature-figure" style="max-width: 280px; margin: 2.5rem auto 0; background: transparent; border: none;">
+              <img src="https://static.wixstatic.com/media/f30f79_9584dcc025134cbebfbdcff5b9eff53f~mv2.png" alt="music burnout illustration" />
+            </div>
+          </div>
+        </div>
+      </section>
+    `
+  }
+};
+
+function navigateTo(route, scrollToId = null) {
+  const slug = PAGES[route] ? route : "home";
+  if (window.location.hash !== `#${slug}`) {
+    history.pushState(null, "", `#${slug}`);
+  }
+  renderCurrentRoute(scrollToId);
+}
+
+function renderCurrentRoute(scrollToId = null) {
+  const hash = window.location.hash.replace(/^#\/?/, "").trim();
+  const slug = PAGES[hash] ? hash : "home";
+  const page = PAGES[slug];
+
+  document.title = page.title;
+  const appEl = document.getElementById("app");
+  if (appEl) {
+    appEl.innerHTML = page.render();
+  }
+
+  // Update active nav links
+  document.querySelectorAll("[data-route]").forEach((el) => {
+    el.classList.toggle("active", el.getAttribute("data-route") === slug);
+  });
+
+  // Close mobile nav if open
+  const nav = document.getElementById("site-nav");
+  if (nav) nav.classList.remove("open");
+
+  if (scrollToId) {
+    const target = document.getElementById(scrollToId);
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth" });
+      return;
+    }
+  }
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+window.addEventListener("hashchange", () => renderCurrentRoute());
+window.addEventListener("DOMContentLoaded", () => {
+  const mobileBtn = document.getElementById("mobile-menu-btn");
+  const nav = document.getElementById("site-nav");
+  if (mobileBtn && nav) {
+    mobileBtn.addEventListener("click", () => {
+      nav.classList.toggle("open");
+    });
+  }
+  renderCurrentRoute();
+});

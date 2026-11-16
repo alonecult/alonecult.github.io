@@ -377,8 +377,7 @@ const DEVICE_PRESETS = {
   pc: { label: "🖥 PC / Desktop", width: "100%", maxW: "1080px", height: "620px", isPkb: false, dims: "1280 × 800 Widescreen" },
   tablet: { label: "📱 Tablet", width: "768px", maxW: "768px", height: "680px", isPkb: false, dims: "768 × 1024 iPad / Tablet" },
   phone: { label: "📱 Phone", width: "390px", maxW: "390px", height: "680px", isPkb: false, dims: "390 × 844 Smartphone" },
-  clicks: { label: "⌨️ Clicks Communicator", width: "360px", maxW: "360px", height: "440px", isPkb: true, dims: "360 × 520 Squat Viewport + Physical QWERTY" },
-  titan: { label: "⌨️ Titan 2 Elite (1:1)", width: "560px", maxW: "560px", height: "560px", isPkb: true, dims: "720 × 720 1:1 Square PKB Display + Physical QWERTY" }
+  clicks: { label: "⌨️ Clicks Communicator (PKB)", width: "360px", maxW: "360px", height: "440px", isPkb: true, dims: "360 × 520 Squat Viewport + Physical QWERTY" }
 };
 
 // ==================== PAGE RENDERERS ====================
@@ -1097,7 +1096,7 @@ function renderAdminTabContent() {
           <div>
             <strong style="font-family: var(--font-typewriter); font-size: 1.2rem; color: #fff;">live multi-device previewer<span class="red-dot">.</span></strong>
             <div style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-muted);">
-              Inspect how every page &amp; layout looks on PC, Tablet, Phone, Clicks Communicator, and Titan 2 Elite (1:1)
+              Inspect how every page &amp; layout looks on PC, Tablet, Phone, and Clicks Communicator (PKB)
             </div>
           </div>
 

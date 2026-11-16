@@ -333,7 +333,8 @@ const DEFAULT_LAYOUTS = {
     readingWidth: "standard",
     fontSize: "medium",
     imagePosition: "bottom" // "bottom" | "top" | "hidden"
-  }
+  },
+  freeformPositions: {}
 };
 
 function getLayouts() {
@@ -372,6 +373,7 @@ function applyGlobalLayoutSettings() {
 
 let activePreviewDevice = "pc";
 let activePreviewRoute = "home";
+let visualDragModeEnabled = true;
 
 const DEVICE_PRESETS = {
   pc: { label: "🖥 PC / Desktop", width: "100%", maxW: "1080px", height: "620px", isPkb: false, dims: "1280 × 800 Widescreen" },
@@ -403,9 +405,9 @@ const PAGES = {
       const blocks = {
         hero: `
           <div class="${heroClass}">
-            <div class="hero-left-stack">
+            <div class="hero-left-stack" data-drag-id="home-hero-photo-1">
               <img class="hero-main-photo" src="${escapeHtml(h.heroPhotoMain)}" alt="iskandar afiq looking down from staircase" />
-              <div class="hero-scroll-prompt">
+              <div class="hero-scroll-prompt" data-drag-id="home-scroll-prompt">
                 <div>
                   scroll down<br/>
                   to know<br/>
@@ -415,10 +417,10 @@ const PAGES = {
               </div>
             </div>
 
-            <div class="hero-right-stack">
+            <div class="hero-right-stack" data-drag-id="home-hero-photo-2">
               <div class="hero-secondary-photo-wrap">
                 <img class="hero-secondary-photo" src="${escapeHtml(h.heroPhotoSecondary)}" alt="iskandar afiq on staircase" />
-                <a href="${escapeHtml(h.instagramUrl)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(h.instagramHandle)} on Instagram">
+                <a href="${escapeHtml(h.instagramUrl)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(h.instagramHandle)} on Instagram" data-drag-id="home-pixel-smiley">
                   <img class="pixel-smiley" src="${escapeHtml(h.pixelSmiley)}" alt="pixel art smiley" />
                 </a>
               </div>
@@ -426,33 +428,33 @@ const PAGES = {
           </div>
         `,
         intro: `
-          <div class="intro-statement">
+          <div class="intro-statement" data-drag-id="home-intro-statement">
             <h1 class="typewriter-title">${escapeHtml(h.headline)}<span class="red-dot">.</span></h1>
             <p class="intro-sub">${escapeHtml(h.subheadline)}</p>
           </div>
         `,
         about: `
           <div class="${aboutClass}" id="about-him">
-            <div class="about-text">
+            <div class="about-text" data-drag-id="home-about-text">
               <h2 class="typewriter-title" style="font-size: 2.2rem; margin-bottom: 1.25rem;">
                 about <span class="red-accent">him</span>.
               </h2>
               ${(h.aboutParagraphs || []).map(p => `<p>${escapeHtml(p)}</p>`).join("")}
             </div>
 
-            <div class="about-photo-card">
+            <div class="about-photo-card" data-drag-id="home-about-photo">
               <img src="${escapeHtml(h.aboutPhoto)}" alt="iskandar afiq portrait" />
             </div>
           </div>
         `,
         quote: `
-          <div class="quote-banner">
+          <div class="quote-banner" data-drag-id="home-quote-banner">
             <blockquote>“${escapeHtml(h.quote)}”</blockquote>
             <cite>- ${escapeHtml(h.quoteAuthor)}</cite>
           </div>
         `,
         directory: `
-          <div class="home-directory">
+          <div class="home-directory" data-drag-id="home-directory">
             <h3 class="typewriter-title" style="font-size: 1.65rem;">explore the archive<span class="red-dot">.</span></h3>
             <div class="${dirColsClass}">
               <div class="dir-card" onclick="navigateTo('my-scripts')">
@@ -537,11 +539,11 @@ const PAGES = {
         : "script-list";
 
       const diplomaBlock = `
-        <div class="scripts-group">
+        <div class="scripts-group" data-drag-id="scripts-diploma-group">
           <h2 class="scripts-group-heading">diploma:</h2>
           <div class="${listClass}">
-            ${(s.diploma || []).map(item => `
-              <div class="script-row">
+            ${(s.diploma || []).map((item, idx) => `
+              <div class="script-row" data-drag-id="script-diploma-${idx}">
                 <span class="script-name">${escapeHtml(item.title)}</span>
                 <a class="download-btn" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">download. ↗</a>
               </div>
@@ -551,11 +553,11 @@ const PAGES = {
       `;
 
       const degreeBlock = `
-        <div class="scripts-group">
+        <div class="scripts-group" data-drag-id="scripts-degree-group">
           <h2 class="scripts-group-heading">degree:</h2>
           <div class="${listClass}">
-            ${(s.degree || []).map(item => `
-              <div class="script-row">
+            ${(s.degree || []).map((item, idx) => `
+              <div class="script-row" data-drag-id="script-degree-${idx}">
                 <span class="script-name">${escapeHtml(item.title)}</span>
                 <a class="download-btn" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">download. ↗</a>
               </div>
@@ -588,7 +590,7 @@ const PAGES = {
 
       return `
       <section class="page-section">
-        <div class="story-container read-${lay.readingWidth || 'standard'}">
+        <div class="story-container read-${lay.readingWidth || 'standard'}" data-drag-id="anna-story-container">
           <h1 class="typewriter-title">${escapeHtml(a.title)}<span class="red-dot">.</span></h1>
           <div class="story-meta">${escapeHtml(a.subtitle)}</div>
           <div class="${bodyClasses}">
@@ -623,16 +625,16 @@ const PAGES = {
 
       return `
       <section class="page-section width-${lay.containerWidth || 'standard'}">
-        <div class="${bannerClass}">
+        <div class="${bannerClass}" data-drag-id="sinister-banner">
           <h1>${escapeHtml(sr.title)}</h1>
           <p>${escapeHtml(sr.description)}</p>
         </div>
 
         <div class="${showcaseClass}">
-          <div>
+          <div data-drag-id="sinister-cover-img">
             <img class="zine-cover" src="${escapeHtml(sr.coverImage)}" alt="sinister roots zine front cover" />
           </div>
-          <div>
+          <div data-drag-id="sinister-details">
             <h2 class="typewriter-title" style="font-size: 1.85rem;">sinister roots.pdf</h2>
             <p style="font-family: var(--font-sans); color: var(--text-muted); margin-bottom: 1rem;">
               below is the front cover of the zine, and the download link.
@@ -682,9 +684,9 @@ const PAGES = {
               isStacked ? "layout-stacked" : ""
             ].filter(Boolean).join(" ");
             const cardStyle = !hasImg ? 'style="grid-template-columns: 1fr;"' : "";
-            const imgBlock = hasImg ? `<div class="review-media"><img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" /></div>` : "";
+            const imgBlock = hasImg ? `<div class="review-media" data-drag-id="audio-photo-${idx}"><img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" /></div>` : "";
             const contentBlock = `
-              <div class="review-content">
+              <div class="review-content" data-drag-id="audio-text-${idx}">
                 <div class="review-header">
                   <h2 class="review-title">${escapeHtml(item.title)}</h2>
                   ${lay.showBadges !== false ? `<span class="review-score-badge">${escapeHtml(item.badge)}</span>` : ""}
@@ -718,7 +720,7 @@ const PAGES = {
         <p class="intro-sub">here are my reviews on some phones. if i got the budget, i'll review it.</p>
 
         <div class="${stackClass}">
-          ${(SITE_CONTENT.phones || []).map(item => {
+          ${(SITE_CONTENT.phones || []).map((item, idx) => {
             const hasImg = Boolean(item.image && item.image.trim());
             const isStacked = lay.cardStyle === "stacked" || lay.columns === "2";
             const useImgLeft = lay.cardStyle === "image-left";
@@ -727,9 +729,9 @@ const PAGES = {
               hasImg && useImgLeft && !isStacked ? "image-left" : "",
               isStacked ? "layout-stacked" : ""
             ].filter(Boolean).join(" ");
-            const imgBlock = hasImg ? `<div class="review-media"><img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" /></div>` : "";
+            const imgBlock = hasImg ? `<div class="review-media" data-drag-id="phone-photo-${idx}"><img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" /></div>` : "";
             const contentBlock = `
-              <div class="review-content">
+              <div class="review-content" data-drag-id="phone-text-${idx}">
                 <div class="review-header">
                   <h2 class="review-title">${escapeHtml(item.title)}</h2>
                   ${lay.showBadges !== false ? `<span class="review-score-badge">${escapeHtml(item.badge)}</span>` : ""}
@@ -769,7 +771,7 @@ const PAGES = {
             ${p[0] ? `<p>${escapeHtml(p[0])}</p>` : ""}
             ${p[1] ? `<p>${escapeHtml(p[1])}</p>` : ""}
 
-            <div class="feature-figure">
+            <div class="feature-figure" data-drag-id="va-banner-img">
               <img src="${escapeHtml(va.bannerImage)}" alt="Artvaluate 5.0 Radio Drama" />
             </div>
 
@@ -778,7 +780,7 @@ const PAGES = {
 
             <p>You can catch my performance of Rahim in <em>1969</em> here (click on the image). I’m the guy in the middle:</p>
 
-            <a class="video-link-card" href="${escapeHtml(va.video1Url)}" target="_blank" rel="noopener noreferrer">
+            <a class="video-link-card" href="${escapeHtml(va.video1Url)}" target="_blank" rel="noopener noreferrer" data-drag-id="va-video-1">
               <img src="${escapeHtml(va.video1Image)}" alt="Rahim in 1969 live radio drama performance" />
               <span class="video-play-badge">▶ Watch 1969 on YouTube</span>
             </a>
@@ -788,7 +790,7 @@ const PAGES = {
 
             <p>You can watch Uncle David in <em>Spaghetti Bolognese</em> here (click on the image). I’m the guy in the flannel:</p>
 
-            <a class="video-link-card" href="${escapeHtml(va.video2Url)}" target="_blank" rel="noopener noreferrer">
+            <a class="video-link-card" href="${escapeHtml(va.video2Url)}" target="_blank" rel="noopener noreferrer" data-drag-id="va-video-2">
               <img src="${escapeHtml(va.video2Image)}" alt="Uncle David in Spaghetti Bolognese live radio drama performance" />
               <span class="video-play-badge">▶ Watch Spaghetti Bolognese on YouTube</span>
             </a>
@@ -817,7 +819,7 @@ const PAGES = {
           <div class="story-body font-${lay.fontSize || 'medium'}">
             ${p[0] ? `<p>${escapeHtml(p[0])}</p>` : ""}
 
-            <div class="feature-figure">
+            <div class="feature-figure" data-drag-id="cyber-img-1">
               <img src="${escapeHtml(cb.image1)}" alt="Toshiba Libretto 70ct" />
               <div class="feature-caption">
                 Toshiba Libretto 70ct (instagram: <a href="${escapeHtml(cb.image1SourceUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(cb.image1SourceText)}</a>)
@@ -827,7 +829,7 @@ const PAGES = {
             ${p[1] ? `<p>${escapeHtml(p[1])}</p>` : ""}
             ${p[2] ? `<p>${escapeHtml(p[2])}</p>` : ""}
 
-            <div class="feature-figure">
+            <div class="feature-figure" data-drag-id="cyber-img-2">
               <img src="${escapeHtml(cb.image2)}" alt="The Reviiser 3D printed Raspberry Pi cyberdeck" />
               <div class="feature-caption">
                 The Reviiser. (Source: <a href="${escapeHtml(cb.image2SourceUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(cb.image2SourceText)}</a>)
@@ -848,7 +850,7 @@ const PAGES = {
       const mb = SITE_CONTENT.musicBurnout;
       const lay = getLayouts().musicBurnout;
       const imgBlock = lay.imagePosition === "hidden" ? "" : `
-        <div class="feature-figure" style="max-width: 280px; margin: 2rem auto; background: transparent; border: none;">
+        <div class="feature-figure" data-drag-id="music-burnout-img" style="max-width: 280px; margin: 2rem auto; background: transparent; border: none;">
           <img src="${escapeHtml(mb.image)}" alt="music burnout illustration" />
         </div>
       `;
@@ -1016,19 +1018,112 @@ function setPreviewDevice(presetKey) {
   renderCurrentRoute();
 }
 
+function getPreviewIframeSrc(route = activePreviewRoute) {
+  return `index.html?preview=${Date.now()}&drag=${visualDragModeEnabled ? "1" : "0"}#${route}`;
+}
+
 function setPreviewRoute(route) {
   activePreviewRoute = route;
   const iframe = document.getElementById("admin-device-iframe");
   if (iframe) {
-    iframe.src = `index.html?preview=${Date.now()}#${route}`;
+    iframe.src = getPreviewIframeSrc(route);
   }
 }
 
 function refreshDeviceIframe() {
   const iframe = document.getElementById("admin-device-iframe");
   if (iframe) {
-    iframe.src = `index.html?preview=${Date.now()}#${activePreviewRoute}`;
+    iframe.src = getPreviewIframeSrc(activePreviewRoute);
   }
+}
+
+function toggleVisualDragMode() {
+  visualDragModeEnabled = !visualDragModeEnabled;
+  renderCurrentRoute();
+  showAdminStatus(visualDragModeEnabled
+    ? "✋ Interactive Drag Mode ON! Drag any outlined image or block directly inside the preview frame."
+    : "Interactive Drag Mode OFF.");
+}
+
+function resetAllDraggedPositions() {
+  const layouts = getLayouts();
+  layouts.freeformPositions = {};
+  localStorage.setItem("alonecult_custom_content", JSON.stringify(SITE_CONTENT));
+  refreshDeviceIframe();
+  showAdminStatus("↺ Reset all freeform dragged image & block positions on pages!");
+}
+
+function swapHeroPhotos() {
+  const tmp = SITE_CONTENT.home.heroPhotoMain;
+  SITE_CONTENT.home.heroPhotoMain = SITE_CONTENT.home.heroPhotoSecondary;
+  SITE_CONTENT.home.heroPhotoSecondary = tmp;
+  localStorage.setItem("alonecult_custom_content", JSON.stringify(SITE_CONTENT));
+  renderCurrentRoute();
+  showAdminStatus("⇄ Swapped Hero Staircase Photo 1 & Photo 2!");
+}
+
+let dndSourceType = null;
+let dndSourceIndex = null;
+
+function handleDndStart(e, listType, idx) {
+  dndSourceType = listType;
+  dndSourceIndex = idx;
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", `${listType}:${idx}`);
+  }
+  e.currentTarget.classList.add("dragging");
+}
+
+function handleDndOver(e) {
+  e.preventDefault();
+  if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
+  e.currentTarget.classList.add("drag-over");
+}
+
+function handleDndLeave(e) {
+  e.currentTarget.classList.remove("drag-over");
+}
+
+function handleDndEnd(e) {
+  e.currentTarget.classList.remove("dragging");
+  document.querySelectorAll(".drag-over").forEach(el => el.classList.remove("drag-over"));
+}
+
+function handleDndDrop(e, listType, targetIdx) {
+  e.preventDefault();
+  e.currentTarget.classList.remove("drag-over");
+  if (dndSourceType !== listType || dndSourceIndex === null || dndSourceIndex === targetIdx) return;
+
+  if (listType === "homeSections") {
+    const lay = getLayouts().home;
+    const arr = [...(lay.sectionOrder || ["hero", "intro", "about", "quote", "directory"])];
+    const [moved] = arr.splice(dndSourceIndex, 1);
+    arr.splice(targetIdx, 0, moved);
+    lay.sectionOrder = arr;
+  } else if (listType === "diplomaScripts") {
+    const arr = SITE_CONTENT.scripts.diploma;
+    const [moved] = arr.splice(dndSourceIndex, 1);
+    arr.splice(targetIdx, 0, moved);
+  } else if (listType === "degreeScripts") {
+    const arr = SITE_CONTENT.scripts.degree;
+    const [moved] = arr.splice(dndSourceIndex, 1);
+    arr.splice(targetIdx, 0, moved);
+  } else if (listType === "audioReviews") {
+    const arr = SITE_CONTENT.audioDevices;
+    const [moved] = arr.splice(dndSourceIndex, 1);
+    arr.splice(targetIdx, 0, moved);
+  } else if (listType === "phoneReviews") {
+    const arr = SITE_CONTENT.phones;
+    const [moved] = arr.splice(dndSourceIndex, 1);
+    arr.splice(targetIdx, 0, moved);
+  }
+
+  dndSourceType = null;
+  dndSourceIndex = null;
+  localStorage.setItem("alonecult_custom_content", JSON.stringify(SITE_CONTENT));
+  renderCurrentRoute();
+  showAdminStatus("Rearranged items via drag-and-drop! Live preview updated.");
 }
 
 function updateLayoutField(pageKey, fieldKey, value) {
@@ -1094,9 +1189,9 @@ function renderAdminTabContent() {
       <div class="device-preview-shell">
         <div class="device-toolbar">
           <div>
-            <strong style="font-family: var(--font-typewriter); font-size: 1.2rem; color: #fff;">live multi-device previewer<span class="red-dot">.</span></strong>
+            <strong style="font-family: var(--font-typewriter); font-size: 1.2rem; color: #fff;">live multi-device previewer &amp; visual drag canvas<span class="red-dot">.</span></strong>
             <div style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-muted);">
-              Inspect how every page &amp; layout looks on PC, Tablet, Phone, and Clicks Communicator (PKB)
+              Drag images &amp; blocks directly inside the preview below, or drag rows in the cards to rearrange!
             </div>
           </div>
 
@@ -1110,7 +1205,24 @@ function renderAdminTabContent() {
             `).join("")}
           </div>
 
-          <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+            <button
+              type="button"
+              class="admin-btn ${visualDragModeEnabled ? 'admin-btn-primary' : ''}"
+              style="padding: 0.4rem 0.75rem;"
+              onclick="toggleVisualDragMode()"
+            >
+              ✋ drag images on page: ${visualDragModeEnabled ? 'ON' : 'OFF'}
+            </button>
+            <button
+              type="button"
+              class="admin-btn"
+              style="padding: 0.4rem 0.65rem;"
+              onclick="resetAllDraggedPositions()"
+              title="Reset all dragged image positions"
+            >
+              ↺ reset positions
+            </button>
             <label style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--red);">Page:</label>
             <select class="admin-input" style="width: auto; padding: 0.4rem 0.65rem;" onchange="setPreviewRoute(this.value)">
               <option value="home" ${activePreviewRoute === 'home' ? 'selected' : ''}>Home (/)</option>
@@ -1135,7 +1247,7 @@ function renderAdminTabContent() {
             <iframe
               id="admin-device-iframe"
               class="device-iframe"
-              src="index.html?preview=${Date.now()}#${activePreviewRoute}"
+              src="${getPreviewIframeSrc(activePreviewRoute)}"
               title="Multi-Device Responsive Preview"
             ></iframe>
             ${dev.isPkb ? `
@@ -1153,7 +1265,7 @@ function renderAdminTabContent() {
             ` : ""}
           </div>
           <div class="device-dimensions-label">
-            Active Simulation: <strong>${dev.label}</strong> — ${dev.dims}
+            Active Simulation: <strong>${dev.label}</strong> — ${dev.dims} · <strong>Tip:</strong> Grab &amp; drag any outlined photo or block inside the screen above!
           </div>
         </div>
       </div>
@@ -1161,7 +1273,7 @@ function renderAdminTabContent() {
       <!-- PER-PAGE LAYOUT EDITOR CARDS -->
       <div class="admin-panel-card">
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem; border-bottom: 1px dashed var(--border); padding-bottom: 0.75rem;">
-          <h3 style="margin:0; border:none; padding:0;">📐 page layout editor (all pages)</h3>
+          <h3 style="margin:0; border:none; padding:0;">📐 page layout &amp; drag-and-drop rearranger (all pages)</h3>
           <button type="button" class="admin-btn admin-btn-danger" onclick="resetAllLayouts()">↺ reset all layouts to default</button>
         </div>
 
@@ -1222,12 +1334,15 @@ function renderAdminTabContent() {
               </select>
             </div>
             <div class="admin-field" style="margin:0;">
-              <label>Hero Collage Layout</label>
-              <select class="admin-input" onchange="updateLayoutField('home', 'heroLayout', this.value)">
-                <option value="collage" ${L.home.heroLayout === 'collage' ? 'selected' : ''}>2-Column Collage (Default)</option>
-                <option value="stacked-center" ${L.home.heroLayout === 'stacked-center' ? 'selected' : ''}>Centered Single Column</option>
-                <option value="reversed" ${L.home.heroLayout === 'reversed' ? 'selected' : ''}>Reversed 2-Column</option>
-              </select>
+              <label>Hero Collage Layout &amp; Photo Swap</label>
+              <div style="display:flex; gap:0.5rem; align-items:center;">
+                <select class="admin-input" onchange="updateLayoutField('home', 'heroLayout', this.value)">
+                  <option value="collage" ${L.home.heroLayout === 'collage' ? 'selected' : ''}>2-Column Collage (Default)</option>
+                  <option value="stacked-center" ${L.home.heroLayout === 'stacked-center' ? 'selected' : ''}>Centered Single Column</option>
+                  <option value="reversed" ${L.home.heroLayout === 'reversed' ? 'selected' : ''}>Reversed 2-Column</option>
+                </select>
+                <button type="button" class="mini-icon-btn" style="padding:0.55rem 0.65rem; white-space:nowrap;" onclick="swapHeroPhotos()" title="Swap Hero Photo 1 & Photo 2">⇄ swap photos</button>
+              </div>
             </div>
             <div class="admin-field" style="margin:0;">
               <label>About Him Section Layout</label>
@@ -1246,11 +1361,20 @@ function renderAdminTabContent() {
               </select>
             </div>
             <div class="admin-field" style="margin:0;">
-              <label>Section Order &amp; Visibility</label>
-              <div class="section-order-list">
+              <label>Drag to Rearrange Sections (or use ⬆/⬇)</label>
+              <div class="dnd-sortable-list">
                 ${(L.home.sectionOrder || ["hero", "intro", "about", "quote", "directory"]).map((secKey, idx, arr) => `
-                  <div class="section-order-row">
-                    <label style="display:flex; align-items:center; gap:0.45rem; margin:0; color: var(--text); cursor:pointer;">
+                  <div
+                    class="dnd-sortable-item"
+                    draggable="true"
+                    ondragstart="handleDndStart(event, 'homeSections', ${idx})"
+                    ondragover="handleDndOver(event)"
+                    ondragleave="handleDndLeave(event)"
+                    ondragend="handleDndEnd(event)"
+                    ondrop="handleDndDrop(event, 'homeSections', ${idx})"
+                  >
+                    <label style="display:flex; align-items:center; gap:0.45rem; margin:0; color: var(--text); cursor:grab;">
+                      <span class="dnd-grip">⋮⋮</span>
                       <input type="checkbox" ${!hiddenSet.has(secKey) ? 'checked' : ''} onchange="toggleHomeSectionVisibility('${secKey}', this.checked)" />
                       <span>${sectionLabels[secKey] || secKey}</span>
                     </label>
@@ -1292,6 +1416,24 @@ function renderAdminTabContent() {
                 <option value="diploma-first" ${L.scripts.groupOrder === 'diploma-first' ? 'selected' : ''}>Diploma First → Degree Second</option>
                 <option value="degree-first" ${L.scripts.groupOrder === 'degree-first' ? 'selected' : ''}>Degree First → Diploma Second</option>
               </select>
+            </div>
+            <div class="admin-field" style="margin:0;">
+              <label>Drag to Reorder Degree Scripts</label>
+              <div class="dnd-sortable-list">
+                ${(SITE_CONTENT.scripts.degree || []).map((item, idx) => `
+                  <div
+                    class="dnd-sortable-item"
+                    draggable="true"
+                    ondragstart="handleDndStart(event, 'degreeScripts', ${idx})"
+                    ondragover="handleDndOver(event)"
+                    ondragleave="handleDndLeave(event)"
+                    ondragend="handleDndEnd(event)"
+                    ondrop="handleDndDrop(event, 'degreeScripts', ${idx})"
+                  >
+                    <span><span class="dnd-grip">⋮⋮</span> ${escapeHtml(item.title)}</span>
+                  </div>
+                `).join("")}
+              </div>
             </div>
           </div>
 
@@ -1384,6 +1526,28 @@ function renderAdminTabContent() {
               <input type="checkbox" ${L.audioDevices.showTldr !== false ? 'checked' : ''} onchange="updateLayoutField('audioDevices', 'showTldr', this.checked)" />
               Show Quality/Performance TL;DR callout boxes
             </label>
+            <div class="admin-field" style="margin:0;">
+              <label>Drag to Rearrange Audio Reviews &amp; Photos</label>
+              <div class="dnd-sortable-list">
+                ${(SITE_CONTENT.audioDevices || []).map((item, idx) => `
+                  <div
+                    class="dnd-sortable-item"
+                    draggable="true"
+                    ondragstart="handleDndStart(event, 'audioReviews', ${idx})"
+                    ondragover="handleDndOver(event)"
+                    ondragleave="handleDndLeave(event)"
+                    ondragend="handleDndEnd(event)"
+                    ondrop="handleDndDrop(event, 'audioReviews', ${idx})"
+                  >
+                    <span style="display:flex; align-items:center; gap:0.5rem;">
+                      <span class="dnd-grip">⋮⋮</span>
+                      ${item.image ? `<img class="dnd-thumb" src="${escapeHtml(item.image)}" alt="" />` : ""}
+                      <span>${escapeHtml(item.title)}</span>
+                    </span>
+                  </div>
+                `).join("")}
+              </div>
+            </div>
           </div>
 
           <!-- 6. PHONES REVIEWS LAYOUT -->
@@ -2112,6 +2276,94 @@ function navigateTo(route, scrollToId = null) {
   renderCurrentRoute(scrollToId);
 }
 
+function applySavedFreeformPositions() {
+  const layouts = getLayouts();
+  const posMap = layouts.freeformPositions || {};
+  document.querySelectorAll("[data-drag-id]").forEach((el) => {
+    const id = el.getAttribute("data-drag-id");
+    const offset = posMap[id];
+    if (offset && (offset.x || offset.y)) {
+      el.style.transform = `translate3d(${offset.x}px, ${offset.y}px, 0)`;
+    } else {
+      el.style.transform = "";
+    }
+  });
+}
+
+function initInteractivePageDragging() {
+  const isDragPreview = window.location.search.includes("drag=1");
+  document.body.classList.toggle("visual-drag-mode", isDragPreview);
+  if (!isDragPreview) return;
+
+  document.querySelectorAll("[data-drag-id]").forEach((el) => {
+    // Prevent nested [data-drag-id] from triggering parent drag simultaneously
+    el.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0 && e.pointerType === "mouse") return;
+      e.stopPropagation();
+      e.preventDefault();
+
+      const dragId = el.getAttribute("data-drag-id");
+      const layouts = getLayouts();
+      if (!layouts.freeformPositions) layouts.freeformPositions = {};
+      const current = layouts.freeformPositions[dragId] || { x: 0, y: 0 };
+
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const origX = Number(current.x) || 0;
+      const origY = Number(current.y) || 0;
+
+      el.classList.add("is-dragging");
+      try {
+        el.setPointerCapture(e.pointerId);
+      } catch (_) {}
+
+      const onMove = (moveEvt) => {
+        const dx = moveEvt.clientX - startX;
+        const dy = moveEvt.clientY - startY;
+        const nextX = Math.round(origX + dx);
+        const nextY = Math.round(origY + dy);
+        el.style.transform = `translate3d(${nextX}px, ${nextY}px, 0)`;
+        layouts.freeformPositions[dragId] = { x: nextX, y: nextY };
+      };
+
+      const onUp = (upEvt) => {
+        el.classList.remove("is-dragging");
+        try {
+          el.releasePointerCapture(upEvt.pointerId);
+        } catch (_) {}
+        el.removeEventListener("pointermove", onMove);
+        el.removeEventListener("pointerup", onUp);
+        el.removeEventListener("pointercancel", onUp);
+        localStorage.setItem("alonecult_custom_content", JSON.stringify(SITE_CONTENT));
+      };
+
+      el.addEventListener("pointermove", onMove);
+      el.addEventListener("pointerup", onUp);
+      el.addEventListener("pointercancel", onUp);
+    });
+
+    el.addEventListener("dblclick", (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      const dragId = el.getAttribute("data-drag-id");
+      const layouts = getLayouts();
+      if (layouts.freeformPositions) {
+        delete layouts.freeformPositions[dragId];
+      }
+      el.style.transform = "";
+      localStorage.setItem("alonecult_custom_content", JSON.stringify(SITE_CONTENT));
+    });
+
+    // Prevent clicking links inside preview when in drag mode
+    el.addEventListener("click", (e) => {
+      if (document.body.classList.contains("visual-drag-mode")) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    });
+  });
+}
+
 function renderCurrentRoute(scrollToId = null) {
   const hash = window.location.hash.replace(/^#\/?/, "").trim();
   const slug = PAGES[hash] ? hash : "home";
@@ -2122,6 +2374,9 @@ function renderCurrentRoute(scrollToId = null) {
   if (appEl) {
     appEl.innerHTML = page.render();
   }
+
+  applySavedFreeformPositions();
+  initInteractivePageDragging();
 
   document.querySelectorAll("[data-route]").forEach((el) => {
     el.classList.toggle("active", el.getAttribute("data-route") === slug);

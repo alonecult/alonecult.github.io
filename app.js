@@ -354,7 +354,11 @@ function getLayouts() {
 function applyGlobalLayoutSettings() {
   const g = getLayouts().global;
   const root = document.documentElement;
-  if (g.accentColor) {
+  const isLight = document.body.classList.contains("light-mode");
+  if (isLight) {
+    root.style.setProperty("--red", "#7b2cbf");
+    root.style.setProperty("--red-hover", "#9d4edd");
+  } else if (g.accentColor) {
     root.style.setProperty("--red", g.accentColor);
     root.style.setProperty("--red-hover", g.accentColor);
   }
@@ -369,6 +373,16 @@ function applyGlobalLayoutSettings() {
     if (g.headerStyle === "centered") header.classList.add("header-centered");
     if (g.headerStyle === "compact") header.classList.add("header-compact");
   }
+}
+
+function applyThemeMode(isLight) {
+  document.documentElement.classList.toggle("light-mode", isLight);
+  document.body.classList.toggle("light-mode", isLight);
+  const cb = document.getElementById("theme-switch-cb");
+  if (cb && cb.checked !== isLight) {
+    cb.checked = isLight;
+  }
+  applyGlobalLayoutSettings();
 }
 
 let activePreviewDevice = "pc";
@@ -2457,6 +2471,21 @@ window.addEventListener("DOMContentLoaded", () => {
           parentItem.classList.add("open");
         }
       });
+    });
+  }
+
+  // Restore saved light/dark mode preference
+  const savedTheme = localStorage.getItem("alonecult_theme_mode");
+  const isLightInitial = savedTheme === "light";
+  applyThemeMode(isLightInitial);
+
+  const themeCb = document.getElementById("theme-switch-cb");
+  if (themeCb) {
+    themeCb.addEventListener("change", (e) => {
+      const isLight = Boolean(e.target.checked);
+      localStorage.setItem("alonecult_theme_mode", isLight ? "light" : "dark");
+      applyThemeMode(isLight);
+      refreshDeviceIframe();
     });
   }
 

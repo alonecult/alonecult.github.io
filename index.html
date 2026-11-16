@@ -13,7 +13,18 @@
     <div class="header-inner">
       <a href="#home" class="brand-logo" onclick="navigateTo('home'); return false;">iskandar afiq</a>
 
-      <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle Menu">menu.</button>
+      <div class="header-right-controls">
+        <!-- From Uiverse.io by r7chardgh -->
+        <label class="switch" title="Toggle Light / Dark Mode">
+          <input class="cb" id="theme-switch-cb" type="checkbox" aria-label="Toggle Light Mode" />
+          <span class="toggle">
+            <span class="left">off</span>
+            <span class="right">on</span>
+          </span>
+        </label>
+
+        <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle Menu">menu.</button>
+      </div>
 
       <nav class="site-nav" id="site-nav" aria-label="Primary Navigation">
         <!-- works. -->

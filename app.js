@@ -235,7 +235,7 @@ const DEFAULT_CONTENT = {
 };
 
 let SITE_CONTENT = JSON.parse(JSON.stringify(DEFAULT_CONTENT));
-let adminActiveTab = "home";
+let adminActiveTab = "layouts";
 let adminSession = {
   authenticated: false,
   token: "",
@@ -271,7 +271,115 @@ function updateFooterFromContent() {
   if (cpEl) cpEl.textContent = h.copyright;
   const leEl = document.getElementById("footer-lastedit");
   if (leEl) leEl.textContent = `last edit: ${h.lastEdit}`;
+  applyGlobalLayoutSettings();
 }
+
+// ==================== DEFAULT PAGE LAYOUTS ====================
+const DEFAULT_LAYOUTS = {
+  global: {
+    headerStyle: "split", // "split" | "centered" | "compact"
+    accentColor: "#df2929",
+    fontMode: "typewriter", // "typewriter" | "mono" | "editorial" | "modern"
+    showFilmGrain: true
+  },
+  home: {
+    containerWidth: "standard", // "narrow" | "standard" | "wide"
+    heroLayout: "collage", // "collage" | "stacked-center" | "reversed"
+    aboutLayout: "text-left", // "text-left" | "photo-left" | "stacked"
+    directoryColumns: "3", // "1" | "2" | "3"
+    sectionOrder: ["hero", "intro", "about", "quote", "directory"],
+    hiddenSections: []
+  },
+  scripts: {
+    containerWidth: "standard",
+    viewMode: "list", // "list" | "grid-2" | "grid-3"
+    groupOrder: "diploma-first" // "diploma-first" | "degree-first"
+  },
+  anna: {
+    readingWidth: "standard", // "narrow" | "standard" | "wide"
+    fontSize: "medium", // "small" | "medium" | "large"
+    textAlign: "left", // "left" | "justify"
+    dropCap: false
+  },
+  sinisterRoots: {
+    containerWidth: "standard",
+    bannerTheme: "olive", // "olive" | "crimson" | "monochrome"
+    showcaseLayout: "cover-left" // "cover-left" | "cover-right" | "centered"
+  },
+  audioDevices: {
+    containerWidth: "standard",
+    columns: "1", // "1" | "2"
+    cardStyle: "alternating", // "alternating" | "image-left" | "image-right" | "stacked"
+    showBadges: true,
+    showTldr: true
+  },
+  phones: {
+    containerWidth: "standard",
+    columns: "1", // "1" | "2"
+    cardStyle: "image-right", // "image-right" | "image-left" | "stacked"
+    showBadges: true
+  },
+  voiceActing: {
+    readingWidth: "standard",
+    fontSize: "medium",
+    textAlign: "left"
+  },
+  cyberdecks: {
+    readingWidth: "standard",
+    fontSize: "medium",
+    headingColor: "cyber-blue" // "cyber-blue" | "red" | "white"
+  },
+  musicBurnout: {
+    readingWidth: "standard",
+    fontSize: "medium",
+    imagePosition: "bottom" // "bottom" | "top" | "hidden"
+  }
+};
+
+function getLayouts() {
+  if (!SITE_CONTENT.layouts) {
+    SITE_CONTENT.layouts = JSON.parse(JSON.stringify(DEFAULT_LAYOUTS));
+  }
+  for (const k of Object.keys(DEFAULT_LAYOUTS)) {
+    if (!SITE_CONTENT.layouts[k]) {
+      SITE_CONTENT.layouts[k] = JSON.parse(JSON.stringify(DEFAULT_LAYOUTS[k]));
+    } else {
+      SITE_CONTENT.layouts[k] = { ...DEFAULT_LAYOUTS[k], ...SITE_CONTENT.layouts[k] };
+    }
+  }
+  return SITE_CONTENT.layouts;
+}
+
+function applyGlobalLayoutSettings() {
+  const g = getLayouts().global;
+  const root = document.documentElement;
+  if (g.accentColor) {
+    root.style.setProperty("--red", g.accentColor);
+    root.style.setProperty("--red-hover", g.accentColor);
+  }
+  document.body.classList.toggle("no-grain", g.showFilmGrain === false);
+  document.body.classList.remove("font-mode-mono", "font-mode-editorial", "font-mode-modern");
+  if (g.fontMode && g.fontMode !== "typewriter") {
+    document.body.classList.add(`font-mode-${g.fontMode}`);
+  }
+  const header = document.querySelector(".site-header");
+  if (header) {
+    header.classList.remove("header-centered", "header-compact");
+    if (g.headerStyle === "centered") header.classList.add("header-centered");
+    if (g.headerStyle === "compact") header.classList.add("header-compact");
+  }
+}
+
+let activePreviewDevice = "pc";
+let activePreviewRoute = "home";
+
+const DEVICE_PRESETS = {
+  pc: { label: "🖥 PC / Desktop", width: "100%", maxW: "1080px", height: "620px", isPkb: false, dims: "1280 × 800 Widescreen" },
+  tablet: { label: "📱 Tablet", width: "768px", maxW: "768px", height: "680px", isPkb: false, dims: "768 × 1024 iPad / Tablet" },
+  phone: { label: "📱 Phone", width: "390px", maxW: "390px", height: "680px", isPkb: false, dims: "390 × 844 Smartphone" },
+  clicks: { label: "⌨️ Clicks Communicator", width: "360px", maxW: "360px", height: "440px", isPkb: true, dims: "360 × 520 Squat Viewport + Physical QWERTY" },
+  titan: { label: "⌨️ Titan 2 Elite (1:1)", width: "560px", maxW: "560px", height: "560px", isPkb: true, dims: "720 × 720 1:1 Square PKB Display + Physical QWERTY" }
+};
 
 // ==================== PAGE RENDERERS ====================
 const PAGES = {
@@ -279,116 +387,141 @@ const PAGES = {
     title: "Home | iskandar afiq",
     render: () => {
       const h = SITE_CONTENT.home;
+      const lay = getLayouts().home;
+      const hidden = new Set(lay.hiddenSections || []);
+      const heroClass = lay.heroLayout === "stacked-center"
+        ? "hero-collage hero-stacked-center"
+        : lay.heroLayout === "reversed"
+        ? "hero-collage hero-reversed"
+        : "hero-collage";
+      const aboutClass = lay.aboutLayout === "photo-left"
+        ? "about-grid about-photo-left"
+        : lay.aboutLayout === "stacked"
+        ? "about-grid about-stacked"
+        : "about-grid";
+      const dirColsClass = `directory-grid cols-${lay.directoryColumns || "3"}`;
+
+      const blocks = {
+        hero: `
+          <div class="${heroClass}">
+            <div class="hero-left-stack">
+              <img class="hero-main-photo" src="${escapeHtml(h.heroPhotoMain)}" alt="iskandar afiq looking down from staircase" />
+              <div class="hero-scroll-prompt">
+                <div>
+                  scroll down<br/>
+                  to know<br/>
+                  about <span class="red-word">him</span>
+                </div>
+                <img class="red-star-arrow" src="https://static.wixstatic.com/media/f30f79_16da3c54ba104bfcb65db6abc5366094~mv2.png" alt="decorative red star and arrow" />
+              </div>
+            </div>
+
+            <div class="hero-right-stack">
+              <div class="hero-secondary-photo-wrap">
+                <img class="hero-secondary-photo" src="${escapeHtml(h.heroPhotoSecondary)}" alt="iskandar afiq on staircase" />
+                <a href="${escapeHtml(h.instagramUrl)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(h.instagramHandle)} on Instagram">
+                  <img class="pixel-smiley" src="${escapeHtml(h.pixelSmiley)}" alt="pixel art smiley" />
+                </a>
+              </div>
+            </div>
+          </div>
+        `,
+        intro: `
+          <div class="intro-statement">
+            <h1 class="typewriter-title">${escapeHtml(h.headline)}<span class="red-dot">.</span></h1>
+            <p class="intro-sub">${escapeHtml(h.subheadline)}</p>
+          </div>
+        `,
+        about: `
+          <div class="${aboutClass}" id="about-him">
+            <div class="about-text">
+              <h2 class="typewriter-title" style="font-size: 2.2rem; margin-bottom: 1.25rem;">
+                about <span class="red-accent">him</span>.
+              </h2>
+              ${(h.aboutParagraphs || []).map(p => `<p>${escapeHtml(p)}</p>`).join("")}
+            </div>
+
+            <div class="about-photo-card">
+              <img src="${escapeHtml(h.aboutPhoto)}" alt="iskandar afiq portrait" />
+            </div>
+          </div>
+        `,
+        quote: `
+          <div class="quote-banner">
+            <blockquote>“${escapeHtml(h.quote)}”</blockquote>
+            <cite>- ${escapeHtml(h.quoteAuthor)}</cite>
+          </div>
+        `,
+        directory: `
+          <div class="home-directory">
+            <h3 class="typewriter-title" style="font-size: 1.65rem;">explore the archive<span class="red-dot">.</span></h3>
+            <div class="${dirColsClass}">
+              <div class="dir-card" onclick="navigateTo('my-scripts')">
+                <div>
+                  <div class="dir-category">works.</div>
+                  <div class="dir-title">my scripts sample.</div>
+                  <div class="dir-desc">Chronological archive of film, TV, radio drama, and stage play scripts from Diploma &amp; Degree.</div>
+                </div>
+              </div>
+              <div class="dir-card" onclick="navigateTo('anna')">
+                <div>
+                  <div class="dir-category">works.</div>
+                  <div class="dir-title">anna. (short story)</div>
+                  <div class="dir-desc">Apocalyptic psychological sci-fi short story following Anna through a crumbling world and the Cylops.</div>
+                </div>
+              </div>
+              <div class="dir-card" onclick="navigateTo('sinister-roots-zine')">
+                <div>
+                  <div class="dir-category">works.</div>
+                  <div class="dir-title">sinister roots (zine)</div>
+                  <div class="dir-desc">End-of-semester anthology zine exploring interconnected timelines grown from the same sinister tree.</div>
+                </div>
+              </div>
+              <div class="dir-card" onclick="navigateTo('audio-devices')">
+                <div>
+                  <div class="dir-category">tech reviews</div>
+                  <div class="dir-title">audio devices.</div>
+                  <div class="dir-desc">Hands-on reviews of Baseus Bowie D03, Picun ANC-05L, Superlux HD681, EarFun Wave Pro, EarFun Tune Pro &amp; Koss KSC75.</div>
+                </div>
+              </div>
+              <div class="dir-card" onclick="navigateTo('phones')">
+                <div>
+                  <div class="dir-category">tech reviews</div>
+                  <div class="dir-title">phones.</div>
+                  <div class="dir-desc">Initial and 1-month review of the Infinix GT 10 Pro (Dimensity 8050, XOS, and PS2 emulation).</div>
+                </div>
+              </div>
+              <div class="dir-card" onclick="navigateTo('first-unofficial-voice-acting-experience')">
+                <div>
+                  <div class="dir-category">experiences.</div>
+                  <div class="dir-title">voice-acting experience</div>
+                  <div class="dir-desc">Live radio drama performances for Artvaluate 5.0 at UiTM Puncak Perdana: 1969 &amp; Spaghetti Bolognese.</div>
+                </div>
+              </div>
+              <div class="dir-card" onclick="navigateTo('wonders-of-cyberdecks')">
+                <div>
+                  <div class="dir-category">fantasizing tech.</div>
+                  <div class="dir-title">wonders of cyberdecks.</div>
+                  <div class="dir-desc">Down the rabbit hole of vintage Toshiba Libretto 70ct laptops, The Reviiser, and r/cyberDeck.</div>
+                </div>
+              </div>
+              <div class="dir-card" onclick="navigateTo('music-burnout')">
+                <div>
+                  <div class="dir-category">shoughrts.</div>
+                  <div class="dir-title">music burnout (11.5.2024)</div>
+                  <div class="dir-desc">Why new albums sit unplayed in our streaming libraries and the comfort zone of familiar playlists.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      };
+
+      const order = lay.sectionOrder || ["hero", "intro", "about", "quote", "directory"];
       return `
-      <section class="page-section">
-        <div class="hero-collage">
-          <div class="hero-left-stack">
-            <img class="hero-main-photo" src="${escapeHtml(h.heroPhotoMain)}" alt="iskandar afiq looking down from staircase" />
-            <div class="hero-scroll-prompt">
-              <div>
-                scroll down<br/>
-                to know<br/>
-                about <span class="red-word">him</span>
-              </div>
-              <img class="red-star-arrow" src="https://static.wixstatic.com/media/f30f79_16da3c54ba104bfcb65db6abc5366094~mv2.png" alt="decorative red star and arrow" />
-            </div>
-          </div>
-
-          <div class="hero-right-stack">
-            <div class="hero-secondary-photo-wrap">
-              <img class="hero-secondary-photo" src="${escapeHtml(h.heroPhotoSecondary)}" alt="iskandar afiq on staircase" />
-              <a href="${escapeHtml(h.instagramUrl)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(h.instagramHandle)} on Instagram">
-                <img class="pixel-smiley" src="${escapeHtml(h.pixelSmiley)}" alt="pixel art smiley" />
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <div class="intro-statement">
-          <h1 class="typewriter-title">${escapeHtml(h.headline)}<span class="red-dot">.</span></h1>
-          <p class="intro-sub">${escapeHtml(h.subheadline)}</p>
-        </div>
-
-        <div class="about-grid" id="about-him">
-          <div class="about-text">
-            <h2 class="typewriter-title" style="font-size: 2.2rem; margin-bottom: 1.25rem;">
-              about <span class="red-accent">him</span>.
-            </h2>
-            ${(h.aboutParagraphs || []).map(p => `<p>${escapeHtml(p)}</p>`).join("")}
-          </div>
-
-          <div class="about-photo-card">
-            <img src="${escapeHtml(h.aboutPhoto)}" alt="iskandar afiq portrait" />
-          </div>
-        </div>
-
-        <div class="quote-banner">
-          <blockquote>“${escapeHtml(h.quote)}”</blockquote>
-          <cite>- ${escapeHtml(h.quoteAuthor)}</cite>
-        </div>
-
-        <div class="home-directory">
-          <h3 class="typewriter-title" style="font-size: 1.65rem;">explore the archive<span class="red-dot">.</span></h3>
-          <div class="directory-grid">
-            <div class="dir-card" onclick="navigateTo('my-scripts')">
-              <div>
-                <div class="dir-category">works.</div>
-                <div class="dir-title">my scripts sample.</div>
-                <div class="dir-desc">Chronological archive of film, TV, radio drama, and stage play scripts from Diploma &amp; Degree.</div>
-              </div>
-            </div>
-            <div class="dir-card" onclick="navigateTo('anna')">
-              <div>
-                <div class="dir-category">works.</div>
-                <div class="dir-title">anna. (short story)</div>
-                <div class="dir-desc">Apocalyptic psychological sci-fi short story following Anna through a crumbling world and the Cylops.</div>
-              </div>
-            </div>
-            <div class="dir-card" onclick="navigateTo('sinister-roots-zine')">
-              <div>
-                <div class="dir-category">works.</div>
-                <div class="dir-title">sinister roots (zine)</div>
-                <div class="dir-desc">End-of-semester anthology zine exploring interconnected timelines grown from the same sinister tree.</div>
-              </div>
-            </div>
-            <div class="dir-card" onclick="navigateTo('audio-devices')">
-              <div>
-                <div class="dir-category">tech reviews</div>
-                <div class="dir-title">audio devices.</div>
-                <div class="dir-desc">Hands-on reviews of Baseus Bowie D03, Picun ANC-05L, Superlux HD681, EarFun Wave Pro, EarFun Tune Pro &amp; Koss KSC75.</div>
-              </div>
-            </div>
-            <div class="dir-card" onclick="navigateTo('phones')">
-              <div>
-                <div class="dir-category">tech reviews</div>
-                <div class="dir-title">phones.</div>
-                <div class="dir-desc">Initial and 1-month review of the Infinix GT 10 Pro (Dimensity 8050, XOS, and PS2 emulation).</div>
-              </div>
-            </div>
-            <div class="dir-card" onclick="navigateTo('first-unofficial-voice-acting-experience')">
-              <div>
-                <div class="dir-category">experiences.</div>
-                <div class="dir-title">voice-acting experience</div>
-                <div class="dir-desc">Live radio drama performances for Artvaluate 5.0 at UiTM Puncak Perdana: 1969 &amp; Spaghetti Bolognese.</div>
-              </div>
-            </div>
-            <div class="dir-card" onclick="navigateTo('wonders-of-cyberdecks')">
-              <div>
-                <div class="dir-category">fantasizing tech.</div>
-                <div class="dir-title">wonders of cyberdecks.</div>
-                <div class="dir-desc">Down the rabbit hole of vintage Toshiba Libretto 70ct laptops, The Reviiser, and r/cyberDeck.</div>
-              </div>
-            </div>
-            <div class="dir-card" onclick="navigateTo('music-burnout')">
-              <div>
-                <div class="dir-category">shoughrts.</div>
-                <div class="dir-title">music burnout (11.5.2024)</div>
-                <div class="dir-desc">Why new albums sit unplayed in our streaming libraries and the comfort zone of familiar playlists.</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+        <section class="page-section width-${lay.containerWidth || 'standard'}">
+          ${order.filter(key => !hidden.has(key) && blocks[key]).map(key => blocks[key]).join("")}
+        </section>
       `;
     }
   },
@@ -397,14 +530,17 @@ const PAGES = {
     title: "my scripts sample. | iskandar afiq",
     render: () => {
       const s = SITE_CONTENT.scripts;
-      return `
-      <section class="page-section">
-        <h1 class="typewriter-title">my scripts sample<span class="red-dot">.</span></h1>
-        <p class="intro-sub" style="margin-bottom: 2.5rem; white-space: pre-line;">${escapeHtml(s.intro)}</p>
+      const lay = getLayouts().scripts;
+      const listClass = lay.viewMode === "grid-2"
+        ? "script-list mode-grid-2"
+        : lay.viewMode === "grid-3"
+        ? "script-list mode-grid-3"
+        : "script-list";
 
+      const diplomaBlock = `
         <div class="scripts-group">
           <h2 class="scripts-group-heading">diploma:</h2>
-          <div class="script-list">
+          <div class="${listClass}">
             ${(s.diploma || []).map(item => `
               <div class="script-row">
                 <span class="script-name">${escapeHtml(item.title)}</span>
@@ -413,10 +549,12 @@ const PAGES = {
             `).join("")}
           </div>
         </div>
+      `;
 
+      const degreeBlock = `
         <div class="scripts-group">
           <h2 class="scripts-group-heading">degree:</h2>
-          <div class="script-list">
+          <div class="${listClass}">
             ${(s.degree || []).map(item => `
               <div class="script-row">
                 <span class="script-name">${escapeHtml(item.title)}</span>
@@ -425,6 +563,13 @@ const PAGES = {
             `).join("")}
           </div>
         </div>
+      `;
+
+      return `
+      <section class="page-section width-${lay.containerWidth || 'standard'}">
+        <h1 class="typewriter-title">my scripts sample<span class="red-dot">.</span></h1>
+        <p class="intro-sub" style="margin-bottom: 2.5rem; white-space: pre-line;">${escapeHtml(s.intro)}</p>
+        ${lay.groupOrder === "degree-first" ? degreeBlock + diplomaBlock : diplomaBlock + degreeBlock}
       </section>
       `;
     }
@@ -434,12 +579,20 @@ const PAGES = {
     title: "anna. (short story) | iskandar afiq",
     render: () => {
       const a = SITE_CONTENT.anna;
+      const lay = getLayouts().anna;
+      const bodyClasses = [
+        "story-body",
+        `font-${lay.fontSize || "medium"}`,
+        lay.textAlign === "justify" ? "align-justify" : "",
+        lay.dropCap ? "drop-cap" : ""
+      ].filter(Boolean).join(" ");
+
       return `
       <section class="page-section">
-        <div class="story-container">
+        <div class="story-container read-${lay.readingWidth || 'standard'}">
           <h1 class="typewriter-title">${escapeHtml(a.title)}<span class="red-dot">.</span></h1>
           <div class="story-meta">${escapeHtml(a.subtitle)}</div>
-          <div class="story-body">
+          <div class="${bodyClasses}">
             ${(a.paragraphs || []).map(p => {
               if (p.startsWith("## ")) {
                 return `<div class="story-time-marker">${escapeHtml(p.replace(/^##\s*/, ""))}</div>`;
@@ -457,14 +610,26 @@ const PAGES = {
     title: "sinister roots (zine sample) | iskandar afiq",
     render: () => {
       const sr = SITE_CONTENT.sinisterRoots;
+      const lay = getLayouts().sinisterRoots;
+      const bannerClass = lay.bannerTheme === "crimson"
+        ? "sinister-banner theme-crimson"
+        : lay.bannerTheme === "monochrome"
+        ? "sinister-banner theme-monochrome"
+        : "sinister-banner";
+      const showcaseClass = lay.showcaseLayout === "cover-right"
+        ? "zine-showcase showcase-cover-right"
+        : lay.showcaseLayout === "centered"
+        ? "zine-showcase showcase-centered"
+        : "zine-showcase";
+
       return `
-      <section class="page-section">
-        <div class="sinister-banner">
+      <section class="page-section width-${lay.containerWidth || 'standard'}">
+        <div class="${bannerClass}">
           <h1>${escapeHtml(sr.title)}</h1>
           <p>${escapeHtml(sr.description)}</p>
         </div>
 
-        <div class="zine-showcase">
+        <div class="${showcaseClass}">
           <div>
             <img class="zine-cover" src="${escapeHtml(sr.coverImage)}" alt="sinister roots zine front cover" />
           </div>
@@ -490,8 +655,12 @@ const PAGES = {
 
   "audio-devices": {
     title: "audio devices. | iskandar afiq",
-    render: () => `
-      <section class="page-section">
+    render: () => {
+      const lay = getLayouts().audioDevices;
+      const stackClass = lay.columns === "2" ? "reviews-stack reviews-grid-2" : "reviews-stack";
+
+      return `
+      <section class="page-section width-${lay.containerWidth || 'standard'}">
         <div class="story-meta">tech reviews</div>
         <h1 class="typewriter-title">audio devices<span class="red-dot">.</span></h1>
         <p class="intro-sub">
@@ -499,77 +668,105 @@ const PAGES = {
           <span style="font-size: 0.9rem; opacity: 0.8;">note: some of these i initially wrote in the Shopee reviews section, but i put them here as well.</span>
         </p>
 
-        <div class="reviews-stack">
-          ${(SITE_CONTENT.audioDevices || []).map(item => {
+        <div class="${stackClass}">
+          ${(SITE_CONTENT.audioDevices || []).map((item, idx) => {
             const hasImg = Boolean(item.image && item.image.trim());
-            const cardClass = !hasImg ? "review-card" : (item.imageLeft ? "review-card image-left" : "review-card");
+            const isStacked = lay.cardStyle === "stacked" || lay.columns === "2";
+            const useImgLeft = lay.cardStyle === "image-left"
+              ? true
+              : lay.cardStyle === "image-right"
+              ? false
+              : (item.imageLeft ?? (idx % 2 === 0));
+            const cardClass = [
+              "review-card",
+              hasImg && useImgLeft && !isStacked ? "image-left" : "",
+              isStacked ? "layout-stacked" : ""
+            ].filter(Boolean).join(" ");
             const cardStyle = !hasImg ? 'style="grid-template-columns: 1fr;"' : "";
             const imgBlock = hasImg ? `<div class="review-media"><img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" /></div>` : "";
             const contentBlock = `
               <div class="review-content">
                 <div class="review-header">
                   <h2 class="review-title">${escapeHtml(item.title)}</h2>
-                  <span class="review-score-badge">${escapeHtml(item.badge)}</span>
+                  ${lay.showBadges !== false ? `<span class="review-score-badge">${escapeHtml(item.badge)}</span>` : ""}
                 </div>
-                ${item.tldr ? `<div class="review-tldr" style="white-space: pre-line;">${escapeHtml(item.tldr)}</div>` : ""}
+                ${lay.showTldr !== false && item.tldr ? `<div class="review-tldr" style="white-space: pre-line;">${escapeHtml(item.tldr)}</div>` : ""}
                 ${(item.paragraphs || []).map(p => `<p>${escapeHtml(p)}</p>`).join("")}
               </div>
             `;
             return `
               <article class="${cardClass}" ${cardStyle}>
-                ${item.imageLeft ? imgBlock + contentBlock : contentBlock + imgBlock}
+                ${isStacked ? imgBlock + contentBlock : (useImgLeft ? imgBlock + contentBlock : contentBlock + imgBlock)}
               </article>
             `;
           }).join("")}
         </div>
       </section>
-    `
+      `;
+    }
   },
 
   "phones": {
     title: "phones. | iskandar afiq",
-    render: () => `
-      <section class="page-section">
+    render: () => {
+      const lay = getLayouts().phones;
+      const stackClass = lay.columns === "2" ? "reviews-stack reviews-grid-2" : "reviews-stack";
+
+      return `
+      <section class="page-section width-${lay.containerWidth || 'standard'}">
         <div class="story-meta">tech reviews</div>
         <h1 class="typewriter-title">phones<span class="red-dot">.</span></h1>
         <p class="intro-sub">here are my reviews on some phones. if i got the budget, i'll review it.</p>
 
-        <div class="reviews-stack">
+        <div class="${stackClass}">
           ${(SITE_CONTENT.phones || []).map(item => {
             const hasImg = Boolean(item.image && item.image.trim());
-            return `
-              <article class="review-card" ${!hasImg ? 'style="grid-template-columns: 1fr;"' : ""}>
-                <div class="review-content">
-                  <div class="review-header">
-                    <h2 class="review-title">${escapeHtml(item.title)}</h2>
-                    <span class="review-score-badge">${escapeHtml(item.badge)}</span>
-                  </div>
-                  ${item.tldr ? `<div class="review-tldr" style="white-space: pre-line;">${escapeHtml(item.tldr)}</div>` : ""}
-                  <h3 class="typewriter-title" style="font-size: 1.35rem; color: var(--red); margin: 1.5rem 0 0.75rem;">Updated Review:</h3>
-                  ${(item.paragraphs || []).map(p => `<p>${escapeHtml(p)}</p>`).join("")}
-                  <p style="font-family: var(--font-mono); color: var(--text-muted); margin-top: 1.5rem;">more phones coming soon when i have budget...</p>
+            const isStacked = lay.cardStyle === "stacked" || lay.columns === "2";
+            const useImgLeft = lay.cardStyle === "image-left";
+            const cardClass = [
+              "review-card",
+              hasImg && useImgLeft && !isStacked ? "image-left" : "",
+              isStacked ? "layout-stacked" : ""
+            ].filter(Boolean).join(" ");
+            const imgBlock = hasImg ? `<div class="review-media"><img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" /></div>` : "";
+            const contentBlock = `
+              <div class="review-content">
+                <div class="review-header">
+                  <h2 class="review-title">${escapeHtml(item.title)}</h2>
+                  ${lay.showBadges !== false ? `<span class="review-score-badge">${escapeHtml(item.badge)}</span>` : ""}
                 </div>
-                ${hasImg ? `<div class="review-media"><img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" /></div>` : ""}
+                ${item.tldr ? `<div class="review-tldr" style="white-space: pre-line;">${escapeHtml(item.tldr)}</div>` : ""}
+                <h3 class="typewriter-title" style="font-size: 1.35rem; color: var(--red); margin: 1.5rem 0 0.75rem;">Updated Review:</h3>
+                ${(item.paragraphs || []).map(p => `<p>${escapeHtml(p)}</p>`).join("")}
+                <p style="font-family: var(--font-mono); color: var(--text-muted); margin-top: 1.5rem;">more phones coming soon when i have budget...</p>
+              </div>
+            `;
+            return `
+              <article class="${cardClass}" ${!hasImg ? 'style="grid-template-columns: 1fr;"' : ""}>
+                ${isStacked ? imgBlock + contentBlock : (useImgLeft ? imgBlock + contentBlock : contentBlock + imgBlock)}
               </article>
             `;
           }).join("")}
         </div>
       </section>
-    `
+      `;
+    }
   },
 
   "first-unofficial-voice-acting-experience": {
     title: "first unofficial voice-acting experience | iskandar afiq",
     render: () => {
       const va = SITE_CONTENT.voiceActing;
+      const lay = getLayouts().voiceActing;
       const p = va.paragraphs || [];
+      const bodyClass = `story-body font-${lay.fontSize || 'medium'} ${lay.textAlign === 'justify' ? 'align-justify' : ''}`;
       return `
       <section class="page-section">
-        <div class="story-container">
+        <div class="story-container read-${lay.readingWidth || 'standard'}">
           <div class="story-meta">experiences.</div>
           <h1 class="typewriter-title">${escapeHtml(va.title)}<span class="red-dot">.</span></h1>
 
-          <div class="story-body">
+          <div class="${bodyClass}">
             ${p[0] ? `<p>${escapeHtml(p[0])}</p>` : ""}
             ${p[1] ? `<p>${escapeHtml(p[1])}</p>` : ""}
 
@@ -609,14 +806,16 @@ const PAGES = {
     title: "wonders of cyberdecks. | iskandar afiq",
     render: () => {
       const cb = SITE_CONTENT.cyberdecks;
+      const lay = getLayouts().cyberdecks;
       const p = cb.paragraphs || [];
+      const hColor = lay.headingColor === "red" ? "var(--red)" : lay.headingColor === "white" ? "#fff" : "var(--cyber-blue)";
       return `
       <section class="page-section">
-        <div class="story-container">
+        <div class="story-container read-${lay.readingWidth || 'standard'}">
           <div class="story-meta">fantasizing tech.</div>
-          <h1 class="cyber-heading">${escapeHtml(cb.title)}</h1>
+          <h1 class="cyber-heading" style="color: ${hColor};">${escapeHtml(cb.title)}</h1>
 
-          <div class="story-body">
+          <div class="story-body font-${lay.fontSize || 'medium'}">
             ${p[0] ? `<p>${escapeHtml(p[0])}</p>` : ""}
 
             <div class="feature-figure">
@@ -648,18 +847,21 @@ const PAGES = {
     title: "music burnout (11.5.2024) | iskandar afiq",
     render: () => {
       const mb = SITE_CONTENT.musicBurnout;
+      const lay = getLayouts().musicBurnout;
+      const imgBlock = lay.imagePosition === "hidden" ? "" : `
+        <div class="feature-figure" style="max-width: 280px; margin: 2rem auto; background: transparent; border: none;">
+          <img src="${escapeHtml(mb.image)}" alt="music burnout illustration" />
+        </div>
+      `;
       return `
       <section class="page-section">
-        <div class="story-container">
+        <div class="story-container read-${lay.readingWidth || 'standard'}">
           <div class="story-meta">shoughrts.</div>
           <h1 class="typewriter-title">${escapeHtml(mb.title)}</h1>
-
-          <div class="story-body">
+          ${lay.imagePosition === "top" ? imgBlock : ""}
+          <div class="story-body font-${lay.fontSize || 'medium'}">
             ${(mb.paragraphs || []).map(p => `<p>${escapeHtml(p)}</p>`).join("")}
-
-            <div class="feature-figure" style="max-width: 280px; margin: 2.5rem auto 0; background: transparent; border: none;">
-              <img src="${escapeHtml(mb.image)}" alt="music burnout illustration" />
-            </div>
+            ${lay.imagePosition !== "top" ? imgBlock : ""}
           </div>
         </div>
       </section>
@@ -727,8 +929,11 @@ function renderAdminView() {
           <button type="button" class="admin-btn" onclick="saveAdminDraftAndNotify()">
             💾 save changes
           </button>
+          <button type="button" class="admin-btn" onclick="switchAdminTab('layouts')">
+            📐 layouts &amp; device preview
+          </button>
           <button type="button" class="admin-btn" onclick="navigateTo('home')">
-            👁 preview site
+            👁 view live site
           </button>
           <button type="button" class="admin-btn admin-btn-primary" id="publish-github-btn" onclick="publishToGitHub()">
             🚀 publish to live GitHub
@@ -742,6 +947,7 @@ function renderAdminView() {
       <div id="admin-status-bar" class="admin-status-bar"></div>
 
       <div class="admin-tabs">
+        <button type="button" class="admin-tab-btn ${adminActiveTab === 'layouts' ? 'active' : ''}" onclick="switchAdminTab('layouts')">📐 page layouts &amp; device preview</button>
         <button type="button" class="admin-tab-btn ${adminActiveTab === 'home' ? 'active' : ''}" onclick="switchAdminTab('home')">1. home &amp; bio</button>
         <button type="button" class="admin-tab-btn ${adminActiveTab === 'scripts' ? 'active' : ''}" onclick="switchAdminTab('scripts')">2. scripts &amp; zine</button>
         <button type="button" class="admin-tab-btn ${adminActiveTab === 'anna' ? 'active' : ''}" onclick="switchAdminTab('anna')">3. anna (story)</button>
@@ -805,7 +1011,477 @@ function switchAdminTab(tab) {
   renderCurrentRoute();
 }
 
+function setPreviewDevice(presetKey) {
+  if (!DEVICE_PRESETS[presetKey]) return;
+  activePreviewDevice = presetKey;
+  renderCurrentRoute();
+}
+
+function setPreviewRoute(route) {
+  activePreviewRoute = route;
+  const iframe = document.getElementById("admin-device-iframe");
+  if (iframe) {
+    iframe.src = `index.html?preview=${Date.now()}#${route}`;
+  }
+}
+
+function refreshDeviceIframe() {
+  const iframe = document.getElementById("admin-device-iframe");
+  if (iframe) {
+    iframe.src = `index.html?preview=${Date.now()}#${activePreviewRoute}`;
+  }
+}
+
+function updateLayoutField(pageKey, fieldKey, value) {
+  const layouts = getLayouts();
+  layouts[pageKey][fieldKey] = value;
+  localStorage.setItem("alonecult_custom_content", JSON.stringify(SITE_CONTENT));
+  applyGlobalLayoutSettings();
+  refreshDeviceIframe();
+  showAdminStatus(`Updated ${pageKey} layout (${fieldKey})! Live device preview refreshed.`);
+}
+
+function moveHomeSection(idx, dir) {
+  const lay = getLayouts().home;
+  const arr = [...(lay.sectionOrder || ["hero", "intro", "about", "quote", "directory"])];
+  const targetIdx = idx + dir;
+  if (targetIdx < 0 || targetIdx >= arr.length) return;
+  const temp = arr[idx];
+  arr[idx] = arr[targetIdx];
+  arr[targetIdx] = temp;
+  lay.sectionOrder = arr;
+  localStorage.setItem("alonecult_custom_content", JSON.stringify(SITE_CONTENT));
+  renderCurrentRoute();
+  showAdminStatus("Reordered Home page sections!");
+}
+
+function toggleHomeSectionVisibility(sectionKey, isVisible) {
+  const lay = getLayouts().home;
+  const hidden = new Set(lay.hiddenSections || []);
+  if (isVisible) {
+    hidden.delete(sectionKey);
+  } else {
+    hidden.add(sectionKey);
+  }
+  lay.hiddenSections = Array.from(hidden);
+  localStorage.setItem("alonecult_custom_content", JSON.stringify(SITE_CONTENT));
+  refreshDeviceIframe();
+  showAdminStatus(`Home section '${sectionKey}' ${isVisible ? "shown" : "hidden"}!`);
+}
+
+function resetAllLayouts() {
+  SITE_CONTENT.layouts = JSON.parse(JSON.stringify(DEFAULT_LAYOUTS));
+  localStorage.setItem("alonecult_custom_content", JSON.stringify(SITE_CONTENT));
+  applyGlobalLayoutSettings();
+  renderCurrentRoute();
+  showAdminStatus("↺ Reset all page layouts to original defaults!");
+}
+
 function renderAdminTabContent() {
+  if (adminActiveTab === "layouts") {
+    const L = getLayouts();
+    const dev = DEVICE_PRESETS[activePreviewDevice] || DEVICE_PRESETS.pc;
+    const hiddenSet = new Set(L.home.hiddenSections || []);
+    const sectionLabels = {
+      hero: "1. Hero Photos & Scroll Prompt",
+      intro: "2. Intro Statement ('iskandar afiq is him.')",
+      about: "3. About Him Bio & Portrait",
+      quote: "4. Quote Banner",
+      directory: "5. Explore the Archive Directory"
+    };
+
+    return `
+      <!-- MULTI-DEVICE LIVE PREVIEWER -->
+      <div class="device-preview-shell">
+        <div class="device-toolbar">
+          <div>
+            <strong style="font-family: var(--font-typewriter); font-size: 1.2rem; color: #fff;">live multi-device previewer<span class="red-dot">.</span></strong>
+            <div style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-muted);">
+              Inspect how every page &amp; layout looks on PC, Tablet, Phone, Clicks Communicator, and Titan 2 Elite (1:1)
+            </div>
+          </div>
+
+          <div class="device-btn-group">
+            ${Object.entries(DEVICE_PRESETS).map(([k, preset]) => `
+              <button
+                type="button"
+                class="device-preset-btn ${activePreviewDevice === k ? 'active' : ''}"
+                onclick="setPreviewDevice('${k}')"
+              >${preset.label}</button>
+            `).join("")}
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <label style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--red);">Page:</label>
+            <select class="admin-input" style="width: auto; padding: 0.4rem 0.65rem;" onchange="setPreviewRoute(this.value)">
+              <option value="home" ${activePreviewRoute === 'home' ? 'selected' : ''}>Home (/)</option>
+              <option value="my-scripts" ${activePreviewRoute === 'my-scripts' ? 'selected' : ''}>Works: My Scripts Sample</option>
+              <option value="anna" ${activePreviewRoute === 'anna' ? 'selected' : ''}>Works: Anna (Short Story)</option>
+              <option value="sinister-roots-zine" ${activePreviewRoute === 'sinister-roots-zine' ? 'selected' : ''}>Works: Sinister Roots Zine</option>
+              <option value="audio-devices" ${activePreviewRoute === 'audio-devices' ? 'selected' : ''}>Tech Reviews: Audio Devices</option>
+              <option value="phones" ${activePreviewRoute === 'phones' ? 'selected' : ''}>Tech Reviews: Phones</option>
+              <option value="first-unofficial-voice-acting-experience" ${activePreviewRoute === 'first-unofficial-voice-acting-experience' ? 'selected' : ''}>Experiences: Voice-Acting</option>
+              <option value="wonders-of-cyberdecks" ${activePreviewRoute === 'wonders-of-cyberdecks' ? 'selected' : ''}>Fantasizing Tech: Cyberdecks</option>
+              <option value="music-burnout" ${activePreviewRoute === 'music-burnout' ? 'selected' : ''}>Shoughrts: Music Burnout</option>
+            </select>
+            <button type="button" class="admin-btn" style="padding: 0.4rem 0.65rem;" onclick="refreshDeviceIframe()" title="Refresh Preview">↻</button>
+          </div>
+        </div>
+
+        <div class="device-stage-wrap">
+          <div
+            class="device-bezel ${activePreviewDevice === 'pc' ? 'bezel-pc' : ''} ${dev.isPkb ? 'bezel-pkb' : ''}"
+            style="width: ${dev.width}; max-width: ${dev.maxW}; height: ${dev.height};"
+          >
+            <iframe
+              id="admin-device-iframe"
+              class="device-iframe"
+              src="index.html?preview=${Date.now()}#${activePreviewRoute}"
+              title="Multi-Device Responsive Preview"
+            ></iframe>
+            ${dev.isPkb ? `
+              <div class="pkb-hardware-chin" aria-hidden="true">
+                <div class="pkb-key-row">
+                  <span class="pkb-key">Q</span><span class="pkb-key">W</span><span class="pkb-key">E</span><span class="pkb-key">R</span><span class="pkb-key">T</span><span class="pkb-key">Y</span><span class="pkb-key">U</span><span class="pkb-key">I</span><span class="pkb-key">O</span><span class="pkb-key">P</span>
+                </div>
+                <div class="pkb-key-row">
+                  <span class="pkb-key">A</span><span class="pkb-key">S</span><span class="pkb-key">D</span><span class="pkb-key">F</span><span class="pkb-key">G</span><span class="pkb-key">H</span><span class="pkb-key">J</span><span class="pkb-key">K</span><span class="pkb-key">L</span><span class="pkb-key">↵</span>
+                </div>
+                <div class="pkb-key-row">
+                  <span class="pkb-key">⇧</span><span class="pkb-key">Z</span><span class="pkb-key">X</span><span class="pkb-key">C</span><span class="pkb-key">SPACE</span><span class="pkb-key">V</span><span class="pkb-key">B</span><span class="pkb-key">N</span><span class="pkb-key">M</span><span class="pkb-key">⌫</span>
+                </div>
+              </div>
+            ` : ""}
+          </div>
+          <div class="device-dimensions-label">
+            Active Simulation: <strong>${dev.label}</strong> — ${dev.dims}
+          </div>
+        </div>
+      </div>
+
+      <!-- PER-PAGE LAYOUT EDITOR CARDS -->
+      <div class="admin-panel-card">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem; border-bottom: 1px dashed var(--border); padding-bottom: 0.75rem;">
+          <h3 style="margin:0; border:none; padding:0;">📐 page layout editor (all pages)</h3>
+          <button type="button" class="admin-btn admin-btn-danger" onclick="resetAllLayouts()">↺ reset all layouts to default</button>
+        </div>
+
+        <div class="layout-editor-grid">
+          <!-- 0. GLOBAL SITE THEME & HEADER -->
+          <div class="layout-page-card">
+            <h4>
+              <span>🌐 global theme &amp; header</span>
+            </h4>
+            <div class="admin-field" style="margin:0;">
+              <label>Header Navigation Style</label>
+              <select class="admin-input" onchange="updateLayoutField('global', 'headerStyle', this.value)">
+                <option value="split" ${L.global.headerStyle === 'split' ? 'selected' : ''}>Split (Logo Left + Nav Right)</option>
+                <option value="centered" ${L.global.headerStyle === 'centered' ? 'selected' : ''}>Centered Stack (Logo Top + Nav Center)</option>
+                <option value="compact" ${L.global.headerStyle === 'compact' ? 'selected' : ''}>Compact Minimal Bar (PKB Friendly)</option>
+              </select>
+            </div>
+            <div class="admin-field" style="margin:0;">
+              <label>Typography Mode</label>
+              <select class="admin-input" onchange="updateLayoutField('global', 'fontMode', this.value)">
+                <option value="typewriter" ${L.global.fontMode === 'typewriter' ? 'selected' : ''}>Signature Typewriter + Serif</option>
+                <option value="mono" ${L.global.fontMode === 'mono' ? 'selected' : ''}>Full Courier Terminal Mono</option>
+                <option value="editorial" ${L.global.fontMode === 'editorial' ? 'selected' : ''}>Classic Literary Serif</option>
+                <option value="modern" ${L.global.fontMode === 'modern' ? 'selected' : ''}>Clean Modern Sans</option>
+              </select>
+            </div>
+            <div class="admin-field" style="margin:0;">
+              <label>Primary Accent Color</label>
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <input type="color" value="${escapeHtml(L.global.accentColor || '#df2929')}" style="width: 44px; height: 38px; background: none; border: 1px solid var(--border); cursor: pointer;" onchange="updateLayoutField('global', 'accentColor', this.value)" />
+                <select class="admin-input" onchange="updateLayoutField('global', 'accentColor', this.value)">
+                  <option value="#df2929" ${L.global.accentColor === '#df2929' ? 'selected' : ''}>Crimson Red (#df2929)</option>
+                  <option value="#ff6b35" ${L.global.accentColor === '#ff6b35' ? 'selected' : ''}>Cyber Orange (#ff6b35)</option>
+                  <option value="#74c0fc" ${L.global.accentColor === '#74c0fc' ? 'selected' : ''}>Retro Blue (#74c0fc)</option>
+                  <option value="#a9e34b" ${L.global.accentColor === '#a9e34b' ? 'selected' : ''}>Terminal Green (#a9e34b)</option>
+                  <option value="#f59f00" ${L.global.accentColor === '#f59f00' ? 'selected' : ''}>Amber Gold (#f59f00)</option>
+                </select>
+              </div>
+            </div>
+            <label style="font-family: var(--font-mono); font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+              <input type="checkbox" ${L.global.showFilmGrain !== false ? 'checked' : ''} onchange="updateLayoutField('global', 'showFilmGrain', this.checked)" />
+              Show subtle retro film grain overlay
+            </label>
+          </div>
+
+          <!-- 1. HOME PAGE LAYOUT -->
+          <div class="layout-page-card">
+            <h4>
+              <span>1. home page</span>
+              <button type="button" class="mini-icon-btn" onclick="setPreviewRoute('home')">preview 👁</button>
+            </h4>
+            <div class="admin-field" style="margin:0;">
+              <label>Page Width</label>
+              <select class="admin-input" onchange="updateLayoutField('home', 'containerWidth', this.value)">
+                <option value="narrow" ${L.home.containerWidth === 'narrow' ? 'selected' : ''}>Narrow (720px)</option>
+                <option value="standard" ${L.home.containerWidth === 'standard' ? 'selected' : ''}>Standard (980px)</option>
+                <option value="wide" ${L.home.containerWidth === 'wide' ? 'selected' : ''}>Wide (1220px)</option>
+              </select>
+            </div>
+            <div class="admin-field" style="margin:0;">
+              <label>Hero Collage Layout</label>
+              <select class="admin-input" onchange="updateLayoutField('home', 'heroLayout', this.value)">
+                <option value="collage" ${L.home.heroLayout === 'collage' ? 'selected' : ''}>2-Column Collage (Default)</option>
+                <option value="stacked-center" ${L.home.heroLayout === 'stacked-center' ? 'selected' : ''}>Centered Single Column</option>
+                <option value="reversed" ${L.home.heroLayout === 'reversed' ? 'selected' : ''}>Reversed 2-Column</option>
+              </select>
+            </div>
+            <div class="admin-field" style="margin:0;">
+              <label>About Him Section Layout</label>
+              <select class="admin-input" onchange="updateLayoutField('home', 'aboutLayout', this.value)">
+                <option value="text-left" ${L.home.aboutLayout === 'text-left' ? 'selected' : ''}>Bio Text Left + Portrait Right</option>
+                <option value="photo-left" ${L.home.aboutLayout === 'photo-left' ? 'selected' : ''}>Portrait Left + Bio Text Right</option>
+                <option value="stacked" ${L.home.aboutLayout === 'stacked' ? 'selected' : ''}>Full-Width Stacked</option>
+              </select>
+            </div>
+            <div class="admin-field" style="margin:0;">
+              <label>Archive Directory Grid Columns</label>
+              <select class="admin-input" onchange="updateLayoutField('home', 'directoryColumns', this.value)">
+                <option value="3" ${L.home.directoryColumns === '3' ? 'selected' : ''}>3 Columns</option>
+                <option value="2" ${L.home.directoryColumns === '2' ? 'selected' : ''}>2 Columns</option>
+                <option value="1" ${L.home.directoryColumns === '1' ? 'selected' : ''}>1 Column List</option>
+              </select>
+            </div>
+            <div class="admin-field" style="margin:0;">
+              <label>Section Order &amp; Visibility</label>
+              <div class="section-order-list">
+                ${(L.home.sectionOrder || ["hero", "intro", "about", "quote", "directory"]).map((secKey, idx, arr) => `
+                  <div class="section-order-row">
+                    <label style="display:flex; align-items:center; gap:0.45rem; margin:0; color: var(--text); cursor:pointer;">
+                      <input type="checkbox" ${!hiddenSet.has(secKey) ? 'checked' : ''} onchange="toggleHomeSectionVisibility('${secKey}', this.checked)" />
+                      <span>${sectionLabels[secKey] || secKey}</span>
+                    </label>
+                    <div class="section-order-controls">
+                      <button type="button" class="mini-icon-btn" ${idx === 0 ? 'disabled' : ''} onclick="moveHomeSection(${idx}, -1)">⬆</button>
+                      <button type="button" class="mini-icon-btn" ${idx === arr.length - 1 ? 'disabled' : ''} onclick="moveHomeSection(${idx}, 1)">⬇</button>
+                    </div>
+                  </div>
+                `).join("")}
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. MY SCRIPTS SAMPLE LAYOUT -->
+          <div class="layout-page-card">
+            <h4>
+              <span>2. my scripts sample</span>
+              <button type="button" class="mini-icon-btn" onclick="setPreviewRoute('my-scripts')">preview 👁</button>
+            </h4>
+            <div class="admin-field" style="margin:0;">
+              <label>Page Width</label>
+              <select class="admin-input" onchange="updateLayoutField('scripts', 'containerWidth', this.value)">
+                <option value="narrow" ${L.scripts.containerWidth === 'narrow' ? 'selected' : ''}>Narrow (720px)</option>
+                <option value="standard" ${L.scripts.containerWidth === 'standard' ? 'selected' : ''}>Standard (980px)</option>
+                <option value="wide" ${L.scripts.containerWidth === 'wide' ? 'selected' : ''}>Wide (1220px)</option>
+              </select>
+            </div>
+            <div class="admin-field" style="margin:0;">
+              <label>Scripts Display Mode</label>
+              <select class="admin-input" onchange="updateLayoutField('scripts', 'viewMode', this.value)">
+                <option value="list" ${L.scripts.viewMode === 'list' ? 'selected' : ''}>Single-Column Rows (Default)</option>
+                <option value="grid-2" ${L.scripts.viewMode === 'grid-2' ? 'selected' : ''}>2-Column Grid Cards</option>
+                <option value="grid-3" ${L.scripts.viewMode === 'grid-3' ? 'selected' : ''}>3-Column Compact Cards</option>
+              </select>
+            </div>
+            <div class="admin-field" style="margin:0;">
+              <label>Category Order</label>
+              <select class="admin-input" onchange="updateLayoutField('scripts', 'groupOrder', this.value)">
+                <option value="diploma-first" ${L.scripts.groupOrder === 'diploma-first' ? 'selected' : ''}>Diploma First → Degree Second</option>
+                <option value="degree-first" ${L.scripts.groupOrder === 'degree-first' ? 'selected' : ''}>Degree First → Diploma Second</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 3. ANNA SHORT STORY LAYOUT -->
+          <div class="layout-page-card">
+            <h4>
+              <span>3. anna. (short story)</span>
+              <button type="button" class="mini-icon-btn" onclick="setPreviewRoute('anna')">preview 👁</button>
+            </h4>
+            <div class="admin-field" style="margin:0;">
+              <label>Reading Column Width</label>
+              <select class="admin-input" onchange="updateLayoutField('anna', 'readingWidth', this.value)">
+                <option value="narrow" ${L.anna.readingWidth === 'narrow' ? 'selected' : ''}>Book Page Narrow (620px)</option>
+                <option value="standard" ${L.anna.readingWidth === 'standard' ? 'selected' : ''}>Editorial Standard (760px)</option>
+                <option value="wide" ${L.anna.readingWidth === 'wide' ? 'selected' : ''}>Wide (980px)</option>
+              </select>
+            </div>
+            <div class="admin-field" style="margin:0;">
+              <label>Story Font Size</label>
+              <select class="admin-input" onchange="updateLayoutField('anna', 'fontSize', this.value)">
+                <option value="small" ${L.anna.fontSize === 'small' ? 'selected' : ''}>Compact (1.02rem)</option>
+                <option value="medium" ${L.anna.fontSize === 'medium' ? 'selected' : ''}>Standard (1.18rem)</option>
+                <option value="large" ${L.anna.fontSize === 'large' ? 'selected' : ''}>Large Comfort (1.34rem)</option>
+              </select>
+            </div>
+            <div class="admin-field" style="margin:0;">
+              <label>Paragraph Alignment</label>
+              <select class="admin-input" onchange="updateLayoutField('anna', 'textAlign', this.value)">
+                <option value="left" ${L.anna.textAlign === 'left' ? 'selected' : ''}>Left-Aligned</option>
+                <option value="justify" ${L.anna.textAlign === 'justify' ? 'selected' : ''}>Book Justified</option>
+              </select>
+            </div>
+            <label style="font-family: var(--font-mono); font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+              <input type="checkbox" ${L.anna.dropCap ? 'checked' : ''} onchange="updateLayoutField('anna', 'dropCap', this.checked)" />
+              Enable literary Drop-Cap on opening paragraph
+            </label>
+          </div>
+
+          <!-- 4. SINISTER ROOTS ZINE LAYOUT -->
+          <div class="layout-page-card">
+            <h4>
+              <span>4. sinister roots (zine)</span>
+              <button type="button" class="mini-icon-btn" onclick="setPreviewRoute('sinister-roots-zine')">preview 👁</button>
+            </h4>
+            <div class="admin-field" style="margin:0;">
+              <label>Header Banner Theme</label>
+              <select class="admin-input" onchange="updateLayoutField('sinisterRoots', 'bannerTheme', this.value)">
+                <option value="olive" ${L.sinisterRoots.bannerTheme === 'olive' ? 'selected' : ''}>Sinister Olive Gradient (Original)</option>
+                <option value="crimson" ${L.sinisterRoots.bannerTheme === 'crimson' ? 'selected' : ''}>Dark Blood Crimson</option>
+                <option value="monochrome" ${L.sinisterRoots.bannerTheme === 'monochrome' ? 'selected' : ''}>Noir Monochrome</option>
+              </select>
+            </div>
+            <div class="admin-field" style="margin:0;">
+              <label>Cover &amp; Download Showcase Layout</label>
+              <select class="admin-input" onchange="updateLayoutField('sinisterRoots', 'showcaseLayout', this.value)">
+                <option value="cover-left" ${L.sinisterRoots.showcaseLayout === 'cover-left' ? 'selected' : ''}>Cover Left + Details Right</option>
+                <option value="cover-right" ${L.sinisterRoots.showcaseLayout === 'cover-right' ? 'selected' : ''}>Details Left + Cover Right</option>
+                <option value="centered" ${L.sinisterRoots.showcaseLayout === 'centered' ? 'selected' : ''}>Centered Vertical Stack</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 5. AUDIO DEVICES REVIEWS LAYOUT -->
+          <div class="layout-page-card">
+            <h4>
+              <span>5. audio devices</span>
+              <button type="button" class="mini-icon-btn" onclick="setPreviewRoute('audio-devices')">preview 👁</button>
+            </h4>
+            <div class="admin-field" style="margin:0;">
+              <label>Reviews Grid Columns</label>
+              <select class="admin-input" onchange="updateLayoutField('audioDevices', 'columns', this.value)">
+                <option value="1" ${L.audioDevices.columns === '1' ? 'selected' : ''}>1 Column Detailed Stack (Default)</option>
+                <option value="2" ${L.audioDevices.columns === '2' ? 'selected' : ''}>2-Column Review Cards Grid</option>
+              </select>
+            </div>
+            <div class="admin-field" style="margin:0;">
+              <label>Photo Placement inside Cards</label>
+              <select class="admin-input" onchange="updateLayoutField('audioDevices', 'cardStyle', this.value)">
+                <option value="alternating" ${L.audioDevices.cardStyle === 'alternating' ? 'selected' : ''}>Alternating Left / Right (Original)</option>
+                <option value="image-left" ${L.audioDevices.cardStyle === 'image-left' ? 'selected' : ''}>All Photos on Left</option>
+                <option value="image-right" ${L.audioDevices.cardStyle === 'image-right' ? 'selected' : ''}>All Photos on Right</option>
+                <option value="stacked" ${L.audioDevices.cardStyle === 'stacked' ? 'selected' : ''}>Top Photo + Text Below</option>
+              </select>
+            </div>
+            <label style="font-family: var(--font-mono); font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+              <input type="checkbox" ${L.audioDevices.showBadges !== false ? 'checked' : ''} onchange="updateLayoutField('audioDevices', 'showBadges', this.checked)" />
+              Show overall score badges
+            </label>
+            <label style="font-family: var(--font-mono); font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+              <input type="checkbox" ${L.audioDevices.showTldr !== false ? 'checked' : ''} onchange="updateLayoutField('audioDevices', 'showTldr', this.checked)" />
+              Show Quality/Performance TL;DR callout boxes
+            </label>
+          </div>
+
+          <!-- 6. PHONES REVIEWS LAYOUT -->
+          <div class="layout-page-card">
+            <h4>
+              <span>6. phones reviews</span>
+              <button type="button" class="mini-icon-btn" onclick="setPreviewRoute('phones')">preview 👁</button>
+            </h4>
+            <div class="admin-field" style="margin:0;">
+              <label>Card Layout</label>
+              <select class="admin-input" onchange="updateLayoutField('phones', 'cardStyle', this.value)">
+                <option value="image-right" ${L.phones.cardStyle === 'image-right' ? 'selected' : ''}>Review Left + Phone Photo Right</option>
+                <option value="image-left" ${L.phones.cardStyle === 'image-left' ? 'selected' : ''}>Phone Photo Left + Review Right</option>
+                <option value="stacked" ${L.phones.cardStyle === 'stacked' ? 'selected' : ''}>Stacked Top-to-Bottom</option>
+              </select>
+            </div>
+            <label style="font-family: var(--font-mono); font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+              <input type="checkbox" ${L.phones.showBadges !== false ? 'checked' : ''} onchange="updateLayoutField('phones', 'showBadges', this.checked)" />
+              Show overall score badges
+            </label>
+          </div>
+
+          <!-- 7. VOICE-ACTING EXPERIENCE LAYOUT -->
+          <div class="layout-page-card">
+            <h4>
+              <span>7. voice-acting</span>
+              <button type="button" class="mini-icon-btn" onclick="setPreviewRoute('first-unofficial-voice-acting-experience')">preview 👁</button>
+            </h4>
+            <div class="admin-field" style="margin:0;">
+              <label>Reading Width</label>
+              <select class="admin-input" onchange="updateLayoutField('voiceActing', 'readingWidth', this.value)">
+                <option value="narrow" ${L.voiceActing.readingWidth === 'narrow' ? 'selected' : ''}>Narrow (620px)</option>
+                <option value="standard" ${L.voiceActing.readingWidth === 'standard' ? 'selected' : ''}>Standard (760px)</option>
+                <option value="wide" ${L.voiceActing.readingWidth === 'wide' ? 'selected' : ''}>Wide (980px)</option>
+              </select>
+            </div>
+            <div class="admin-field" style="margin:0;">
+              <label>Font Size</label>
+              <select class="admin-input" onchange="updateLayoutField('voiceActing', 'fontSize', this.value)">
+                <option value="small" ${L.voiceActing.fontSize === 'small' ? 'selected' : ''}>Compact</option>
+                <option value="medium" ${L.voiceActing.fontSize === 'medium' ? 'selected' : ''}>Standard</option>
+                <option value="large" ${L.voiceActing.fontSize === 'large' ? 'selected' : ''}>Large</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 8. WONDERS OF CYBERDECKS LAYOUT -->
+          <div class="layout-page-card">
+            <h4>
+              <span>8. cyberdecks</span>
+              <button type="button" class="mini-icon-btn" onclick="setPreviewRoute('wonders-of-cyberdecks')">preview 👁</button>
+            </h4>
+            <div class="admin-field" style="margin:0;">
+              <label>Reading Width</label>
+              <select class="admin-input" onchange="updateLayoutField('cyberdecks', 'readingWidth', this.value)">
+                <option value="narrow" ${L.cyberdecks.readingWidth === 'narrow' ? 'selected' : ''}>Narrow (620px)</option>
+                <option value="standard" ${L.cyberdecks.readingWidth === 'standard' ? 'selected' : ''}>Standard (760px)</option>
+                <option value="wide" ${L.cyberdecks.readingWidth === 'wide' ? 'selected' : ''}>Wide (980px)</option>
+              </select>
+            </div>
+            <div class="admin-field" style="margin:0;">
+              <label>Headline Accent Color</label>
+              <select class="admin-input" onchange="updateLayoutField('cyberdecks', 'headingColor', this.value)">
+                <option value="cyber-blue" ${L.cyberdecks.headingColor === 'cyber-blue' ? 'selected' : ''}>Cyber Blue (#9ec5fe)</option>
+                <option value="red" ${L.cyberdecks.headingColor === 'red' ? 'selected' : ''}>Crimson Red</option>
+                <option value="white" ${L.cyberdecks.headingColor === 'white' ? 'selected' : ''}>Crisp White</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 9. MUSIC BURNOUT LAYOUT -->
+          <div class="layout-page-card">
+            <h4>
+              <span>9. music burnout</span>
+              <button type="button" class="mini-icon-btn" onclick="setPreviewRoute('music-burnout')">preview 👁</button>
+            </h4>
+            <div class="admin-field" style="margin:0;">
+              <label>Reading Width</label>
+              <select class="admin-input" onchange="updateLayoutField('musicBurnout', 'readingWidth', this.value)">
+                <option value="narrow" ${L.musicBurnout.readingWidth === 'narrow' ? 'selected' : ''}>Narrow (620px)</option>
+                <option value="standard" ${L.musicBurnout.readingWidth === 'standard' ? 'selected' : ''}>Standard (760px)</option>
+                <option value="wide" ${L.musicBurnout.readingWidth === 'wide' ? 'selected' : ''}>Wide (980px)</option>
+              </select>
+            </div>
+            <div class="admin-field" style="margin:0;">
+              <label>Illustration Placement</label>
+              <select class="admin-input" onchange="updateLayoutField('musicBurnout', 'imagePosition', this.value)">
+                <option value="bottom" ${L.musicBurnout.imagePosition === 'bottom' ? 'selected' : ''}>Bottom of Essay (Original)</option>
+                <option value="top" ${L.musicBurnout.imagePosition === 'top' ? 'selected' : ''}>Top Below Headline</option>
+                <option value="hidden" ${L.musicBurnout.imagePosition === 'hidden' ? 'selected' : ''}>Hidden</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
   if (adminActiveTab === "home") {
     const h = SITE_CONTENT.home;
     return `

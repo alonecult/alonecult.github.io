@@ -675,6 +675,8 @@ const PAGES = {
 };
 
 // ==================== ADMIN AUTH & CMS LOGIC ====================
+const ADMIN_PASS = "WRITER777!";
+
 function renderAdminView() {
   if (!adminSession.authenticated) {
     return `
@@ -683,19 +685,19 @@ function renderAdminView() {
           <span class="admin-badge">restricted access · admin only</span>
           <h1 class="typewriter-title" style="font-size: 2rem; margin-bottom: 0.65rem;">admin login<span class="red-dot">.</span></h1>
           <p style="font-family: var(--font-sans); color: var(--text-muted); font-size: 0.94rem; margin-bottom: 1.5rem;">
-            Sign in with your GitHub Personal Access Token for <strong>@${GITHUB_OWNER}</strong>. GitHub verifies your repository permissions before unlocking the editor and allowing live commits to <code>${GITHUB_OWNER}/${GITHUB_REPO}</code>.
+            Enter your admin password to unlock the portfolio editor for <strong>iskandar afiq</strong>.
           </p>
 
           <div id="admin-login-error" class="admin-status-bar"></div>
 
           <form onsubmit="handleAdminLogin(event)">
             <div class="admin-field">
-              <label for="admin-token-input">GitHub Personal Access Token (PAT)</label>
+              <label for="admin-password-input">Admin Password</label>
               <input
-                id="admin-token-input"
+                id="admin-password-input"
                 type="password"
                 class="admin-input"
-                placeholder="ghp_xxxxxxxxxxxxxxxxxxxx or github_pat_..."
+                placeholder="Enter admin password..."
                 required
                 autocomplete="current-password"
               />
@@ -705,20 +707,8 @@ function renderAdminView() {
               <button type="submit" id="admin-login-btn" class="admin-btn admin-btn-primary">
                 unlock admin editor →
               </button>
-              <a
-                href="https://github.com/settings/tokens/new?description=alonecult.github.io+Admin+CMS&scopes=repo"
-                target="_blank"
-                rel="noopener noreferrer"
-                style="font-family: var(--font-mono); font-size: 0.84rem; color: var(--red); text-decoration: underline;"
-              >
-                generate a token on GitHub ↗
-              </a>
             </div>
           </form>
-
-          <div style="margin-top: 1.75rem; padding-top: 1.15rem; border-top: 1px dashed var(--border); font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">
-            <strong>Security Note:</strong> Your token stays only in your browser and communicates directly with <code>https://api.github.com</code> over HTTPS. No third-party server ever sees it, and only <strong>@${GITHUB_OWNER}</strong> can push changes.
-          </div>
         </div>
       </section>
     `;
@@ -728,18 +718,20 @@ function renderAdminView() {
     <section class="page-section">
       <div class="admin-topbar">
         <div class="admin-user-pill">
-          ${adminSession.user?.avatar_url ? `<img src="${escapeHtml(adminSession.user.avatar_url)}" alt="admin avatar" />` : ""}
           <div>
-            <strong style="color: var(--red);">admin:</strong> @${escapeHtml(adminSession.user?.login || GITHUB_OWNER)}
+            <strong style="color: var(--red);">admin:</strong> iskandar afiq (@${GITHUB_OWNER})
           </div>
         </div>
 
         <div class="admin-actions">
+          <button type="button" class="admin-btn" onclick="saveAdminDraftAndNotify()">
+            💾 save changes
+          </button>
           <button type="button" class="admin-btn" onclick="navigateTo('home')">
             👁 preview site
           </button>
           <button type="button" class="admin-btn admin-btn-primary" id="publish-github-btn" onclick="publishToGitHub()">
-            🚀 publish to live site (GitHub)
+            🚀 publish to live GitHub
           </button>
           <button type="button" class="admin-btn admin-btn-danger" onclick="handleAdminLogout()">
             sign out
@@ -755,6 +747,7 @@ function renderAdminView() {
         <button type="button" class="admin-tab-btn ${adminActiveTab === 'anna' ? 'active' : ''}" onclick="switchAdminTab('anna')">3. anna (story)</button>
         <button type="button" class="admin-tab-btn ${adminActiveTab === 'reviews' ? 'active' : ''}" onclick="switchAdminTab('reviews')">4. tech reviews</button>
         <button type="button" class="admin-tab-btn ${adminActiveTab === 'articles' ? 'active' : ''}" onclick="switchAdminTab('articles')">5. experiences &amp; thoughts</button>
+        <button type="button" class="admin-tab-btn ${adminActiveTab === 'settings' ? 'active' : ''}" onclick="switchAdminTab('settings')">⚙ github sync</button>
       </div>
 
       <div id="admin-tab-content">
@@ -773,72 +766,37 @@ function showAdminStatus(message, isError = false) {
   bar.classList.add("visible");
 }
 
-async function handleAdminLogin(e) {
+function handleAdminLogin(e) {
   e.preventDefault();
-  const input = document.getElementById("admin-token-input");
-  const btn = document.getElementById("admin-login-btn");
-  const token = (input?.value || "").trim();
-  if (!token) return;
+  const input = document.getElementById("admin-password-input");
+  const pass = (input?.value || "").trim();
+  if (!pass) return;
 
-  if (btn) {
-    btn.disabled = true;
-    btn.textContent = "verifying with GitHub...";
+  if (pass !== ADMIN_PASS) {
+    showAdminStatus("Incorrect admin password. Access denied.", true);
+    return;
   }
 
-  try {
-    const userRes = await fetch("https://api.github.com/user", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/vnd.github+json"
-      }
-    });
-
-    if (!userRes.ok) {
-      throw new Error("Invalid GitHub token. Please check your Personal Access Token.");
-    }
-
-    const user = await userRes.json();
-    const repoRes = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/vnd.github+json"
-      }
-    });
-
-    if (!repoRes.ok) {
-      throw new Error(`Could not access ${GITHUB_OWNER}/${GITHUB_REPO}. Ensure your token has 'repo' scope.`);
-    }
-
-    const repo = await repoRes.json();
-    const isOwner = user.login.toLowerCase() === GITHUB_OWNER.toLowerCase();
-    const canPush = Boolean(repo.permissions && (repo.permissions.admin || repo.permissions.push));
-
-    if (!isOwner && !canPush) {
-      throw new Error(`Access denied: @${user.login} does not have admin/write permissions for ${GITHUB_OWNER}/${GITHUB_REPO}.`);
-    }
-
-    adminSession = {
-      authenticated: true,
-      token,
-      user
-    };
-    sessionStorage.setItem("alonecult_admin_token", token);
-    sessionStorage.setItem("alonecult_admin_user", JSON.stringify(user));
-    renderCurrentRoute();
-  } catch (err) {
-    showAdminStatus(err.message || "Authentication failed.", true);
-    if (btn) {
-      btn.disabled = false;
-      btn.textContent = "unlock admin editor →";
-    }
-  }
+  const savedGhToken = localStorage.getItem("alonecult_gh_token") || "";
+  adminSession = {
+    authenticated: true,
+    token: savedGhToken,
+    user: { login: GITHUB_OWNER }
+  };
+  sessionStorage.setItem("alonecult_admin_unlocked", "true");
+  renderCurrentRoute();
 }
 
 function handleAdminLogout() {
   adminSession = { authenticated: false, token: "", user: null };
-  sessionStorage.removeItem("alonecult_admin_token");
-  sessionStorage.removeItem("alonecult_admin_user");
+  sessionStorage.removeItem("alonecult_admin_unlocked");
   renderCurrentRoute();
+}
+
+function saveAdminDraftAndNotify() {
+  saveCurrentFormToMemory();
+  localStorage.setItem("alonecult_custom_content", JSON.stringify(SITE_CONTENT));
+  showAdminStatus("✅ Changes saved! Click '👁 preview site' to view or '🚀 publish to live GitHub' to push to alonecult.github.io.");
 }
 
 function switchAdminTab(tab) {
@@ -1160,7 +1118,61 @@ function renderAdminTabContent() {
     `;
   }
 
+  if (adminActiveTab === "settings") {
+    return `
+      <div class="admin-panel-card">
+        <h3>⚙ github sync &amp; backup</h3>
+        <p style="font-family: var(--font-sans); color: var(--text-muted); font-size: 0.92rem; margin-bottom: 1.25rem;">
+          All edits are saved immediately in your browser when you click <strong>💾 save changes</strong>. To push changes directly to <code>https://alonecult.github.io</code> with one click, optionally paste a GitHub Personal Access Token (<code>repo</code> scope) below—or copy/download <code>content.json</code> anytime.
+        </p>
+        <div class="admin-field">
+          <label>Optional GitHub Personal Access Token (for 1-click live GitHub commits)</label>
+          <input
+            class="admin-input"
+            type="password"
+            id="edit-gh-token"
+            placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+            value="${escapeHtml(adminSession.token || "")}"
+            onchange="saveCurrentFormToMemory()"
+          />
+        </div>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1rem;">
+          <a
+            class="admin-btn"
+            href="https://github.com/settings/tokens/new?description=alonecult.github.io+Admin+CMS&scopes=repo"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            🔑 generate GitHub token ↗
+          </a>
+          <button type="button" class="admin-btn" onclick="copyContentJson()">
+            📋 copy content.json
+          </button>
+          <button type="button" class="admin-btn" onclick="downloadContentJson()">
+            ⬇ download content.json
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
   return "";
+}
+
+function copyContentJson() {
+  saveCurrentFormToMemory();
+  navigator.clipboard.writeText(JSON.stringify(SITE_CONTENT, null, 2));
+  showAdminStatus("📋 Copied content.json to clipboard!");
+}
+
+function downloadContentJson() {
+  saveCurrentFormToMemory();
+  const blob = new Blob([JSON.stringify(SITE_CONTENT, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "content.json";
+  a.click();
+  showAdminStatus("⬇ Downloaded content.json!");
 }
 
 function splitParagraphs(text) {
@@ -1236,6 +1248,12 @@ function saveCurrentFormToMemory() {
     SITE_CONTENT.cyberdecks.paragraphs = splitParagraphs(document.getElementById("edit-cb-body")?.value || "");
     SITE_CONTENT.musicBurnout.title = document.getElementById("edit-mb-title")?.value || "";
     SITE_CONTENT.musicBurnout.paragraphs = splitParagraphs(document.getElementById("edit-mb-body")?.value || "");
+  } else if (adminActiveTab === "settings") {
+    const tokInput = document.getElementById("edit-gh-token");
+    if (tokInput) {
+      adminSession.token = tokInput.value.trim();
+      localStorage.setItem("alonecult_gh_token", adminSession.token);
+    }
   }
 
   // Stamp today's date in DD-MM-YYYY
@@ -1244,6 +1262,7 @@ function saveCurrentFormToMemory() {
   const mm = String(now.getMonth() + 1).padStart(2, "0");
   const yyyy = now.getFullYear();
   SITE_CONTENT.home.lastEdit = `${dd}-${mm}-${yyyy}`;
+  localStorage.setItem("alonecult_custom_content", JSON.stringify(SITE_CONTENT));
   updateFooterFromContent();
 }
 
@@ -1291,6 +1310,11 @@ async function uploadAssetToRepo(fileInput, targetInputId) {
   const file = fileInput?.files?.[0];
   if (!file || !adminSession.authenticated) return;
 
+  if (!adminSession.token) {
+    showAdminStatus("To upload files directly to GitHub, add your GitHub token in the '⚙ github sync' tab first.", true);
+    return;
+  }
+
   showAdminStatus(`Uploading ${file.name} to GitHub repository...`);
   try {
     const arrayBuffer = await file.arrayBuffer();
@@ -1328,7 +1352,7 @@ async function uploadAssetToRepo(fileInput, targetInputId) {
       targetInput.value = publicUrl;
       saveCurrentFormToMemory();
     }
-    showAdminStatus(`Uploaded ${file.name}! Click "publish to live site (GitHub)" to save all content changes.`);
+    showAdminStatus(`Uploaded ${file.name}! Click "🚀 publish to live GitHub" to save all content changes.`);
   } catch (err) {
     showAdminStatus(err.message || "Asset upload failed.", true);
   }
@@ -1337,6 +1361,13 @@ async function uploadAssetToRepo(fileInput, targetInputId) {
 async function publishToGitHub() {
   if (!adminSession.authenticated) return;
   saveCurrentFormToMemory();
+
+  if (!adminSession.token) {
+    adminActiveTab = "settings";
+    renderCurrentRoute();
+    showAdminStatus("Saved locally! To push directly to GitHub Pages, paste your GitHub token below or click '📋 copy content.json'.");
+    return;
+  }
 
   const btn = document.getElementById("publish-github-btn");
   if (btn) {
@@ -1389,7 +1420,7 @@ async function publishToGitHub() {
   } finally {
     if (btn) {
       btn.disabled = false;
-      btn.textContent = "🚀 publish to live site (GitHub)";
+      btn.textContent = "🚀 publish to live GitHub";
     }
   }
 }
@@ -1440,29 +1471,34 @@ async function loadRemoteContent() {
     if (res.ok) {
       const data = await res.json();
       if (data && data.home) {
-        SITE_CONTENT = data;
+        const localDraft = localStorage.getItem("alonecult_custom_content");
+        SITE_CONTENT = localDraft ? JSON.parse(localDraft) : data;
         updateFooterFromContent();
         renderCurrentRoute();
       }
     }
   } catch (_) {
-    // Fallback to embedded DEFAULT_CONTENT
+    // Fallback to embedded DEFAULT_CONTENT or localDraft
   }
 }
 
 window.addEventListener("hashchange", () => renderCurrentRoute());
 window.addEventListener("DOMContentLoaded", () => {
-  // Restore active admin session if present in sessionStorage
-  const savedToken = sessionStorage.getItem("alonecult_admin_token");
-  const savedUser = sessionStorage.getItem("alonecult_admin_user");
-  if (savedToken && savedUser) {
+  // Restore local draft if edited in browser
+  const localDraft = localStorage.getItem("alonecult_custom_content");
+  if (localDraft) {
     try {
-      adminSession = {
-        authenticated: true,
-        token: savedToken,
-        user: JSON.parse(savedUser)
-      };
+      SITE_CONTENT = JSON.parse(localDraft);
     } catch (_) {}
+  }
+
+  // Restore active admin session if unlocked in sessionStorage
+  if (sessionStorage.getItem("alonecult_admin_unlocked") === "true") {
+    adminSession = {
+      authenticated: true,
+      token: localStorage.getItem("alonecult_gh_token") || "",
+      user: { login: GITHUB_OWNER }
+    };
   }
 
   const mobileBtn = document.getElementById("mobile-menu-btn");

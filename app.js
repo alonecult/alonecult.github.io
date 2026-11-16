@@ -2383,7 +2383,10 @@ function renderCurrentRoute(scrollToId = null) {
   });
 
   const nav = document.getElementById("site-nav");
-  if (nav) nav.classList.remove("open");
+  if (nav) {
+    nav.classList.remove("open");
+    nav.querySelectorAll(".nav-item.open").forEach((item) => item.classList.remove("open"));
+  }
 
   if (scrollToId) {
     const target = document.getElementById(scrollToId);
@@ -2435,7 +2438,25 @@ window.addEventListener("DOMContentLoaded", () => {
   const nav = document.getElementById("site-nav");
   if (mobileBtn && nav) {
     mobileBtn.addEventListener("click", () => {
-      nav.classList.toggle("open");
+      const isOpen = nav.classList.toggle("open");
+      if (!isOpen) {
+        nav.querySelectorAll(".nav-item.open").forEach((item) => item.classList.remove("open"));
+      }
+    });
+
+    // Accordion toggle for category buttons (e.g. 'works.', 'tech reviews', etc.)
+    nav.querySelectorAll(".nav-dropdown-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const parentItem = btn.closest(".nav-item");
+        if (!parentItem) return;
+        const willOpen = !parentItem.classList.contains("open");
+        nav.querySelectorAll(".nav-item.open").forEach((item) => item.classList.remove("open"));
+        if (willOpen) {
+          parentItem.classList.add("open");
+        }
+      });
     });
   }
 

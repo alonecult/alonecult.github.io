@@ -334,7 +334,9 @@ const DEFAULT_LAYOUTS = {
     fontSize: "medium",
     imagePosition: "bottom" // "bottom" | "top" | "hidden"
   },
-  freeformPositions: {}
+  freeformPositions: {},
+  elementStyles: {},
+  customElements: {}
 };
 
 function getLayouts() {
@@ -1121,20 +1123,92 @@ function refreshDeviceIframe() {
   }
 }
 
+let wixAddDrawerOpen = false;
+let wixUndoStack = [];
+let wixRedoStack = [];
+
+function pushWixHistorySnapshot() {
+  const snap = JSON.stringify(SITE_CONTENT);
+  if (wixUndoStack.length === 0 || wixUndoStack[wixUndoStack.length - 1] !== snap) {
+    wixUndoStack.push(snap);
+    if (wixUndoStack.length > 30) wixUndoStack.shift();
+    wixRedoStack = [];
+  }
+}
+
+function handleWixUndo() {
+  if (wixUndoStack.length === 0) {
+    showAdminStatus("Nothing to undo.");
+    return;
+  }
+  wixRedoStack.push(JSON.stringify(SITE_CONTENT));
+  const prev = wixUndoStack.pop();
+  SITE_CONTENT = JSON.parse(prev);
+  localStorage.setItem("alonecult_custom_content", prev);
+  applyGlobalLayoutSettings();
+  renderCurrentRoute();
+  showAdminStatus("↩ Undid last visual edit!");
+}
+
+function handleWixRedo() {
+  if (wixRedoStack.length === 0) {
+    showAdminStatus("Nothing to redo.");
+    return;
+  }
+  wixUndoStack.push(JSON.stringify(SITE_CONTENT));
+  const next = wixRedoStack.pop();
+  SITE_CONTENT = JSON.parse(next);
+  localStorage.setItem("alonecult_custom_content", next);
+  applyGlobalLayoutSettings();
+  renderCurrentRoute();
+  showAdminStatus("↪ Redid visual edit!");
+}
+
+function toggleWixAddDrawer() {
+  wixAddDrawerOpen = !wixAddDrawerOpen;
+  renderCurrentRoute();
+}
+
+function addWixCustomElement(type) {
+  pushWixHistorySnapshot();
+  const layouts = getLayouts();
+  if (!layouts.customElements) layouts.customElements = {};
+  const route = activePreviewRoute || "home";
+  if (!Array.isArray(layouts.customElements[route])) {
+    layouts.customElements[route] = [];
+  }
+  const id = `wix-el-${Date.now()}`;
+  const defaults = {
+    heading: { id, type: "heading", text: "new typewriter heading." },
+    paragraph: { id, type: "paragraph", text: "Double-click this paragraph in the preview canvas to edit its text directly in place, or drag it anywhere on the page." },
+    quote: { id, type: "quote", text: "“A new story begins where the old frame ends.” — iskandar afiq" },
+    image: { id, type: "image", src: "https://static.wixstatic.com/media/f30f79_332d8993089e40c9b29f70cf3b544539~mv2.png", caption: "custom photo / sticker" },
+    button: { id, type: "button", text: "custom link / download ↗", url: "https://alonecult.github.io" },
+    divider: { id, type: "divider", text: "✦ ✦ ✦" }
+  };
+  layouts.customElements[route].push(defaults[type] || defaults.paragraph);
+  wixAddDrawerOpen = false;
+  localStorage.setItem("alonecult_custom_content", JSON.stringify(SITE_CONTENT));
+  renderCurrentRoute();
+  showAdminStatus(`＋ Added new ${type} block to '${route}'! Click & drag or resize it inside the preview canvas.`);
+}
+
 function toggleVisualDragMode() {
   visualDragModeEnabled = !visualDragModeEnabled;
   renderCurrentRoute();
   showAdminStatus(visualDragModeEnabled
-    ? "✋ Interactive Drag Mode ON! Drag any outlined image or block directly inside the preview frame."
-    : "Interactive Drag Mode OFF.");
+    ? "✋ Wix Studio Visual Edit Mode ON! Click any element for the floating inspector bar, drag to move, drag ↘ corner to resize, or double-click text to edit inline."
+    : "Visual Edit Mode OFF.");
 }
 
 function resetAllDraggedPositions() {
+  pushWixHistorySnapshot();
   const layouts = getLayouts();
   layouts.freeformPositions = {};
+  layouts.elementStyles = {};
   localStorage.setItem("alonecult_custom_content", JSON.stringify(SITE_CONTENT));
   refreshDeviceIframe();
-  showAdminStatus("↺ Reset all freeform dragged image & block positions on pages!");
+  showAdminStatus("↺ Reset all freeform dragged positions, scales, and custom element overrides!");
 }
 
 function swapHeroPhotos() {
@@ -1289,21 +1363,47 @@ function renderAdminTabContent() {
             `).join("")}
           </div>
 
-          <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;">
+            <button
+              type="button"
+              class="admin-btn"
+              style="padding: 0.4rem 0.75rem; border-color: #3b82f6; color: #60a5fa;"
+              onclick="toggleWixAddDrawer()"
+            >
+              ＋ add element
+            </button>
             <button
               type="button"
               class="admin-btn ${visualDragModeEnabled ? 'admin-btn-primary' : ''}"
               style="padding: 0.4rem 0.75rem;"
               onclick="toggleVisualDragMode()"
             >
-              ✋ drag images on page: ${visualDragModeEnabled ? 'ON' : 'OFF'}
+              ✋ wix visual editor: ${visualDragModeEnabled ? 'ON' : 'OFF'}
+            </button>
+            <button
+              type="button"
+              class="admin-btn"
+              style="padding: 0.4rem 0.6rem;"
+              onclick="handleWixUndo()"
+              title="Undo last visual change"
+            >
+              ↩ undo
+            </button>
+            <button
+              type="button"
+              class="admin-btn"
+              style="padding: 0.4rem 0.6rem;"
+              onclick="handleWixRedo()"
+              title="Redo visual change"
+            >
+              ↪ redo
             </button>
             <button
               type="button"
               class="admin-btn"
               style="padding: 0.4rem 0.65rem;"
               onclick="resetAllDraggedPositions()"
-              title="Reset all dragged image positions"
+              title="Reset all dragged image positions & scales"
             >
               ↺ reset positions
             </button>
@@ -1320,6 +1420,40 @@ function renderAdminTabContent() {
               <option value="music-burnout" ${activePreviewRoute === 'music-burnout' ? 'selected' : ''}>Shoughrts: Music Burnout</option>
             </select>
             <button type="button" class="admin-btn" style="padding: 0.4rem 0.65rem;" onclick="refreshDeviceIframe()" title="Refresh Preview">↻</button>
+          </div>
+        </div>
+
+        <!-- WIX + ADD ELEMENTS DRAWER -->
+        <div class="wix-add-drawer ${wixAddDrawerOpen ? 'open' : ''}">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong style="font-family:var(--font-mono); font-size:0.88rem; color:#60a5fa;">＋ Add New Wix Element to Page (${escapeHtml(activePreviewRoute)})</strong>
+            <button type="button" class="mini-icon-btn" onclick="toggleWixAddDrawer()">✕ close</button>
+          </div>
+          <div class="wix-add-grid">
+            <button type="button" class="wix-add-item-btn" onclick="addWixCustomElement('heading')">
+              <strong>𝗧 Typewriter Heading</strong>
+              <span>Add a custom title block</span>
+            </button>
+            <button type="button" class="wix-add-item-btn" onclick="addWixCustomElement('paragraph')">
+              <strong>¶ Text Paragraph</strong>
+              <span>Add an editable story/note block</span>
+            </button>
+            <button type="button" class="wix-add-item-btn" onclick="addWixCustomElement('quote')">
+              <strong>❝ Pull Quote Box</strong>
+              <span>Add a highlighted quote banner</span>
+            </button>
+            <button type="button" class="wix-add-item-btn" onclick="addWixCustomElement('image')">
+              <strong>🖼 Image / Sticker</strong>
+              <span>Add a draggable photo or badge</span>
+            </button>
+            <button type="button" class="wix-add-item-btn" onclick="addWixCustomElement('button')">
+              <strong>⬇ Action / PDF Button</strong>
+              <span>Add a clickable link or download</span>
+            </button>
+            <button type="button" class="wix-add-item-btn" onclick="addWixCustomElement('divider')">
+              <strong>― Retro Divider</strong>
+              <span>Add a decorative section break</span>
+            </button>
           </div>
         </div>
 
@@ -2360,41 +2494,317 @@ function navigateTo(route, scrollToId = null) {
   renderCurrentRoute(scrollToId);
 }
 
+let selectedWixElement = null;
+
+function renderCustomWixElementsForRoute(slug) {
+  if (slug === "admin") return "";
+  const layouts = getLayouts();
+  const customList = (layouts.customElements && layouts.customElements[slug]) || [];
+  if (!customList.length) return "";
+
+  return `
+    <div class="page-section" style="padding-top: 0;">
+      <div class="wix-custom-elements-layer">
+        ${customList.map((el) => {
+          if (el.type === "heading") {
+            return `<div class="wix-custom-element" data-drag-id="${escapeHtml(el.id)}" data-wix-custom="true"><h2 class="typewriter-title" style="font-size:2rem;">${escapeHtml(el.text)}</h2></div>`;
+          }
+          if (el.type === "quote") {
+            return `<div class="quote-banner wix-custom-element" data-drag-id="${escapeHtml(el.id)}" data-wix-custom="true"><blockquote>${escapeHtml(el.text)}</blockquote></div>`;
+          }
+          if (el.type === "image") {
+            return `
+              <div class="feature-figure wix-custom-element" data-drag-id="${escapeHtml(el.id)}" data-wix-custom="true" style="max-width:360px; margin:0 auto;">
+                <img src="${escapeHtml(el.src)}" alt="${escapeHtml(el.caption || 'custom image')}" />
+                <div class="feature-caption">${escapeHtml(el.caption || "")}</div>
+              </div>
+            `;
+          }
+          if (el.type === "button") {
+            return `
+              <div class="wix-custom-element" data-drag-id="${escapeHtml(el.id)}" data-wix-custom="true">
+                <a class="download-btn" href="${escapeHtml(el.url || '#')}" target="_blank" rel="noopener noreferrer">${escapeHtml(el.text)}</a>
+              </div>
+            `;
+          }
+          if (el.type === "divider") {
+            return `
+              <div class="wix-custom-element" data-drag-id="${escapeHtml(el.id)}" data-wix-custom="true" style="text-align:center; padding:1rem 0; border-bottom:1px dashed var(--red); font-family:var(--font-mono); color:var(--red);">
+                ${escapeHtml(el.text || "✦ ✦ ✦")}
+              </div>
+            `;
+          }
+          return `<div class="story-body wix-custom-element" data-drag-id="${escapeHtml(el.id)}" data-wix-custom="true"><p>${escapeHtml(el.text)}</p></div>`;
+        }).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function getElementTransformString(offset) {
+  if (!offset) return "";
+  const x = Number(offset.x) || 0;
+  const y = Number(offset.y) || 0;
+  const s = Number(offset.scale) || 1;
+  if (!x && !y && s === 1) return "";
+  return `translate3d(${x}px, ${y}px, 0) scale(${s.toFixed(3)})`;
+}
+
 function applySavedFreeformPositions() {
   const layouts = getLayouts();
   const posMap = layouts.freeformPositions || {};
+  const styleMap = layouts.elementStyles || {};
+
   document.querySelectorAll("[data-drag-id]").forEach((el) => {
     const id = el.getAttribute("data-drag-id");
     const offset = posMap[id];
-    if (offset && (offset.x || offset.y)) {
-      el.style.transform = `translate3d(${offset.x}px, ${offset.y}px, 0)`;
-    } else {
-      el.style.transform = "";
+    el.style.transform = getElementTransformString(offset);
+    el.style.transformOrigin = "top left";
+
+    const st = styleMap[id];
+    if (st) {
+      if (st.hidden) {
+        el.style.display = "none";
+      } else {
+        el.style.display = "";
+      }
+      if (st.color) el.style.color = st.color;
+      if (st.zIndex !== undefined) el.style.zIndex = String(st.zIndex);
+      if (st.customImgSrc) {
+        const img = el.tagName === "IMG" ? el : el.querySelector("img");
+        if (img) img.src = st.customImgSrc;
+      }
+      if (st.customText) {
+        const textTarget = el.querySelector("h1, h2, h3, blockquote, p, span") || el;
+        if (textTarget && !textTarget.querySelector("img")) {
+          textTarget.innerText = st.customText;
+        }
+      }
     }
   });
+}
+
+function ensureWixFloatingToolbar() {
+  let bar = document.getElementById("wix-floating-toolbar");
+  if (bar) return bar;
+
+  bar = document.createElement("div");
+  bar.id = "wix-floating-toolbar";
+  bar.className = "wix-floating-toolbar";
+  bar.innerHTML = `
+    <span id="wix-selected-label" style="color:#60a5fa; font-size:0.75rem; font-weight:700; padding:0 0.35rem;">Element</span>
+    <span class="wix-tool-divider"></span>
+    <button type="button" class="wix-tool-btn" onclick="wixInspectorAction('edit')">✏️ Edit Text / Image</button>
+    <button type="button" class="wix-tool-btn" onclick="wixInspectorAction('scaleDown')" title="Shrink Element">📏 -</button>
+    <button type="button" class="wix-tool-btn" onclick="wixInspectorAction('scaleUp')" title="Enlarge Element">📏 +</button>
+    <label class="wix-tool-btn" style="margin:0; cursor:pointer;" title="Tint Text/Border Color">
+      🎨 Color
+      <input type="color" id="wix-inspector-color" value="#df2929" style="width:18px; height:18px; border:none; background:none; padding:0; cursor:pointer;" onchange="wixInspectorAction('color', this.value)" />
+    </label>
+    <button type="button" class="wix-tool-btn" onclick="wixInspectorAction('front')" title="Bring Forward">⬆ Front</button>
+    <button type="button" class="wix-tool-btn" onclick="wixInspectorAction('back')" title="Send Backward">⬇ Back</button>
+    <button type="button" class="wix-tool-btn" onclick="wixInspectorAction('clone')" title="Duplicate Element">⎘ Clone</button>
+    <button type="button" class="wix-tool-btn" onclick="wixInspectorAction('reset')" title="Reset Element">↺ Reset</button>
+    <button type="button" class="wix-tool-btn danger" onclick="wixInspectorAction('delete')" title="Hide / Delete Element">🗑</button>
+  `;
+  document.body.appendChild(bar);
+  return bar;
+}
+
+function selectWixElement(el) {
+  document.querySelectorAll("[data-drag-id].wix-selected").forEach((node) => {
+    if (node !== el) node.classList.remove("wix-selected");
+  });
+  selectedWixElement = el;
+  const bar = ensureWixFloatingToolbar();
+  if (!el) {
+    bar.classList.remove("visible");
+    return;
+  }
+  el.classList.add("wix-selected");
+  const id = el.getAttribute("data-drag-id") || "element";
+  const lbl = document.getElementById("wix-selected-label");
+  if (lbl) lbl.textContent = `✦ ${id}`;
+  bar.classList.add("visible");
+}
+
+function wixInspectorAction(action, value = null) {
+  if (!selectedWixElement) return;
+  const dragId = selectedWixElement.getAttribute("data-drag-id");
+  if (!dragId) return;
+
+  const layouts = getLayouts();
+  if (!layouts.freeformPositions) layouts.freeformPositions = {};
+  if (!layouts.elementStyles) layouts.elementStyles = {};
+  const pos = layouts.freeformPositions[dragId] || { x: 0, y: 0, scale: 1 };
+  const st = layouts.elementStyles[dragId] || {};
+
+  if (action === "scaleUp" || action === "scaleDown") {
+    const curScale = Number(pos.scale) || 1;
+    const nextScale = Math.max(0.4, Math.min(2.4, curScale + (action === "scaleUp" ? 0.1 : -0.1)));
+    pos.scale = Number(nextScale.toFixed(2));
+    layouts.freeformPositions[dragId] = pos;
+    selectedWixElement.style.transform = getElementTransformString(pos);
+  } else if (action === "color" && value) {
+    st.color = value;
+    layouts.elementStyles[dragId] = st;
+    selectedWixElement.style.color = value;
+  } else if (action === "front" || action === "back") {
+    const curZ = Number(st.zIndex) || 10;
+    const nextZ = Math.max(1, curZ + (action === "front" ? 5 : -5));
+    st.zIndex = nextZ;
+    layouts.elementStyles[dragId] = st;
+    selectedWixElement.style.zIndex = String(nextZ);
+  } else if (action === "reset") {
+    delete layouts.freeformPositions[dragId];
+    delete layouts.elementStyles[dragId];
+    selectedWixElement.style.transform = "";
+    selectedWixElement.style.color = "";
+    selectedWixElement.style.zIndex = "";
+  } else if (action === "delete") {
+    const hash = window.location.hash.replace(/^#\/?/, "").trim() || "home";
+    if (layouts.customElements && Array.isArray(layouts.customElements[hash])) {
+      const beforeLen = layouts.customElements[hash].length;
+      layouts.customElements[hash] = layouts.customElements[hash].filter(item => item.id !== dragId);
+      if (layouts.customElements[hash].length < beforeLen) {
+        selectedWixElement.remove();
+        selectWixElement(null);
+        localStorage.setItem("alonecult_custom_content", JSON.stringify(SITE_CONTENT));
+        return;
+      }
+    }
+    st.hidden = true;
+    layouts.elementStyles[dragId] = st;
+    selectedWixElement.style.display = "none";
+    selectWixElement(null);
+  } else if (action === "clone") {
+    const hash = window.location.hash.replace(/^#\/?/, "").trim() || "home";
+    if (!layouts.customElements) layouts.customElements = {};
+    if (!Array.isArray(layouts.customElements[hash])) layouts.customElements[hash] = [];
+    const img = selectedWixElement.querySelector("img");
+    const newId = `wix-clone-${Date.now()}`;
+    if (img) {
+      layouts.customElements[hash].push({ id: newId, type: "image", src: img.src, caption: "cloned photo" });
+    } else {
+      layouts.customElements[hash].push({ id: newId, type: "paragraph", text: selectedWixElement.innerText || "Cloned block" });
+    }
+    localStorage.setItem("alonecult_custom_content", JSON.stringify(SITE_CONTENT));
+    renderCurrentRoute();
+    return;
+  } else if (action === "edit") {
+    const img = selectedWixElement.tagName === "IMG" ? selectedWixElement : selectedWixElement.querySelector("img");
+    if (img && !selectedWixElement.querySelector("p, h1, h2")) {
+      const nextUrl = window.prompt("Enter new Image URL for this photo/sticker:", img.src);
+      if (nextUrl && nextUrl.trim()) {
+        img.src = nextUrl.trim();
+        st.customImgSrc = nextUrl.trim();
+        layouts.elementStyles[dragId] = st;
+      }
+    } else {
+      activateInlineTextEdit(selectedWixElement);
+      return;
+    }
+  }
+
+  localStorage.setItem("alonecult_custom_content", JSON.stringify(SITE_CONTENT));
+}
+
+function activateInlineTextEdit(el) {
+  const target = el.querySelector("h1, h2, h3, blockquote, p, span") || el;
+  if (!target) return;
+  target.setAttribute("contenteditable", "true");
+  target.classList.add("wix-inline-editing");
+  target.focus();
+
+  const onBlur = () => {
+    target.removeAttribute("contenteditable");
+    target.classList.remove("wix-inline-editing");
+    target.removeEventListener("blur", onBlur);
+
+    const dragId = el.getAttribute("data-drag-id");
+    if (dragId) {
+      const layouts = getLayouts();
+      if (!layouts.elementStyles) layouts.elementStyles = {};
+      if (!layouts.elementStyles[dragId]) layouts.elementStyles[dragId] = {};
+      layouts.elementStyles[dragId].customText = target.innerText;
+      localStorage.setItem("alonecult_custom_content", JSON.stringify(SITE_CONTENT));
+    }
+  };
+  target.addEventListener("blur", onBlur);
 }
 
 function initInteractivePageDragging() {
   const isDragPreview = window.location.search.includes("drag=1");
   document.body.classList.toggle("visual-drag-mode", isDragPreview);
-  if (!isDragPreview) return;
+  if (!isDragPreview) {
+    const bar = document.getElementById("wix-floating-toolbar");
+    if (bar) bar.classList.remove("visible");
+    return;
+  }
+
+  ensureWixFloatingToolbar();
 
   document.querySelectorAll("[data-drag-id]").forEach((el) => {
-    // Prevent nested [data-drag-id] from triggering parent drag simultaneously
+    // Attach corner resize handle if not already present
+    if (!el.querySelector(".wix-resize-handle")) {
+      const handle = document.createElement("span");
+      handle.className = "wix-resize-handle";
+      handle.title = "Drag to resize / scale element";
+      handle.addEventListener("pointerdown", (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        selectWixElement(el);
+
+        const dragId = el.getAttribute("data-drag-id");
+        const layouts = getLayouts();
+        if (!layouts.freeformPositions) layouts.freeformPositions = {};
+        const current = layouts.freeformPositions[dragId] || { x: 0, y: 0, scale: 1 };
+        const startX = e.clientX;
+        const origScale = Number(current.scale) || 1;
+
+        try { handle.setPointerCapture(e.pointerId); } catch (_) {}
+
+        const onResizeMove = (mv) => {
+          const delta = (mv.clientX - startX) / 220;
+          const nextScale = Math.max(0.4, Math.min(2.4, origScale + delta));
+          current.scale = Number(nextScale.toFixed(2));
+          layouts.freeformPositions[dragId] = current;
+          el.style.transform = getElementTransformString(current);
+        };
+
+        const onResizeUp = (up) => {
+          try { handle.releasePointerCapture(up.pointerId); } catch (_) {}
+          handle.removeEventListener("pointermove", onResizeMove);
+          handle.removeEventListener("pointerup", onResizeUp);
+          localStorage.setItem("alonecult_custom_content", JSON.stringify(SITE_CONTENT));
+        };
+
+        handle.addEventListener("pointermove", onResizeMove);
+        handle.addEventListener("pointerup", onResizeUp);
+      });
+      el.appendChild(handle);
+    }
+
+    // Drag to move + click to select in Wix Inspector
     el.addEventListener("pointerdown", (e) => {
+      if (e.target.classList.contains("wix-resize-handle")) return;
+      if (e.target.getAttribute("contenteditable") === "true") return;
       if (e.button !== 0 && e.pointerType === "mouse") return;
       e.stopPropagation();
       e.preventDefault();
 
+      selectWixElement(el);
+
       const dragId = el.getAttribute("data-drag-id");
       const layouts = getLayouts();
       if (!layouts.freeformPositions) layouts.freeformPositions = {};
-      const current = layouts.freeformPositions[dragId] || { x: 0, y: 0 };
+      const current = layouts.freeformPositions[dragId] || { x: 0, y: 0, scale: 1 };
 
       const startX = e.clientX;
       const startY = e.clientY;
       const origX = Number(current.x) || 0;
       const origY = Number(current.y) || 0;
+      const curScale = Number(current.scale) || 1;
 
       el.classList.add("is-dragging");
       try {
@@ -2406,8 +2816,11 @@ function initInteractivePageDragging() {
         const dy = moveEvt.clientY - startY;
         const nextX = Math.round(origX + dx);
         const nextY = Math.round(origY + dy);
-        el.style.transform = `translate3d(${nextX}px, ${nextY}px, 0)`;
-        layouts.freeformPositions[dragId] = { x: nextX, y: nextY };
+        current.x = nextX;
+        current.y = nextY;
+        current.scale = curScale;
+        el.style.transform = getElementTransformString(current);
+        layouts.freeformPositions[dragId] = current;
       };
 
       const onUp = (upEvt) => {
@@ -2426,16 +2839,17 @@ function initInteractivePageDragging() {
       el.addEventListener("pointercancel", onUp);
     });
 
+    // Double-click activates inline text editing (or resets if image)
     el.addEventListener("dblclick", (e) => {
       e.stopPropagation();
       e.preventDefault();
-      const dragId = el.getAttribute("data-drag-id");
-      const layouts = getLayouts();
-      if (layouts.freeformPositions) {
-        delete layouts.freeformPositions[dragId];
+      selectWixElement(el);
+      const hasText = el.querySelector("h1, h2, h3, blockquote, p");
+      if (hasText) {
+        activateInlineTextEdit(el);
+      } else {
+        wixInspectorAction("reset");
       }
-      el.style.transform = "";
-      localStorage.setItem("alonecult_custom_content", JSON.stringify(SITE_CONTENT));
     });
 
     // Prevent clicking links inside preview when in drag mode
@@ -2456,7 +2870,7 @@ function renderCurrentRoute(scrollToId = null) {
   document.title = page.title;
   const appEl = document.getElementById("app");
   if (appEl) {
-    appEl.innerHTML = page.render();
+    appEl.innerHTML = page.render() + renderCustomWixElementsForRoute(slug);
   }
 
   applySavedFreeformPositions();

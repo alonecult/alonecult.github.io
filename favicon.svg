@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Special+Elite&amp;display=swap');
+    .bg { fill: #0a0a0a; stroke: #df2929; stroke-width: 4; }
+    .txt {
+      font-family: 'Special Elite', 'Courier Prime', 'Courier New', monospace;
+      font-size: 56px;
+      font-weight: 400;
+      fill: #f2f0ea;
+      letter-spacing: -1px;
+    }
+    .dot { fill: #df2929; }
+    @media (prefers-color-scheme: light) {
+      .bg { fill: #f6f4ef; stroke: #7b2cbf; }
+      .txt { fill: #161514; }
+      .dot { fill: #7b2cbf; }
+    }
+  </style>
+  <rect class="bg" x="4" y="4" width="120" height="120" rx="20" />
+  <text x="64" y="82" text-anchor="middle" class="txt">i<tspan class="dot">.</tspan>a<tspan class="dot">.</tspan></text>
+</svg>

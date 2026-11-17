@@ -373,6 +373,76 @@ function applyGlobalLayoutSettings() {
     if (g.headerStyle === "centered") header.classList.add("header-centered");
     if (g.headerStyle === "compact") header.classList.add("header-compact");
   }
+  updateDynamicFavicon();
+}
+
+function updateDynamicFavicon() {
+  try {
+    const isLight = document.body.classList.contains("light-mode");
+    const g = getLayouts().global;
+    const accent = isLight ? "#7b2cbf" : (g.accentColor || "#df2929");
+    const bg = isLight ? "#f6f4ef" : "#0a0a0a";
+    const fg = isLight ? "#161514" : "#f2f0ea";
+
+    const drawIcon = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 128;
+      canvas.height = 128;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      // Rounded badge background
+      const r = 22;
+      ctx.beginPath();
+      ctx.moveTo(4 + r, 4);
+      ctx.lineTo(124 - r, 4);
+      ctx.quadraticCurveTo(124, 4, 124, 4 + r);
+      ctx.lineTo(124, 124 - r);
+      ctx.quadraticCurveTo(124, 124, 124 - r, 124);
+      ctx.lineTo(4 + r, 124);
+      ctx.quadraticCurveTo(4, 124, 4, 124 - r);
+      ctx.lineTo(4, 4 + r);
+      ctx.quadraticCurveTo(4, 4, 4 + r, 4);
+      ctx.closePath();
+      ctx.fillStyle = bg;
+      ctx.fill();
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = accent;
+      ctx.stroke();
+
+      // Render "i.a." using exact heading font ('Special Elite')
+      ctx.font = "58px 'Special Elite', 'Courier Prime', monospace";
+      ctx.textBaseline = "middle";
+
+      const parts = [
+        { text: "i", color: fg },
+        { text: ".", color: accent },
+        { text: "a", color: fg },
+        { text: ".", color: accent }
+      ];
+      const widths = parts.map((p) => ctx.measureText(p.text).width);
+      const totalW = widths.reduce((a, b) => a + b, 0);
+      let x = (128 - totalW) / 2;
+      const y = 68;
+
+      parts.forEach((p, idx) => {
+        ctx.fillStyle = p.color;
+        ctx.fillText(p.text, x, y);
+        x += widths[idx];
+      });
+
+      const link = document.getElementById("site-favicon");
+      if (link) {
+        link.type = "image/png";
+        link.href = canvas.toDataURL("image/png");
+      }
+    };
+
+    drawIcon();
+    if (document.fonts && document.fonts.load) {
+      document.fonts.load("58px 'Special Elite'").then(drawIcon).catch(() => {});
+    }
+  } catch (_) {}
 }
 
 function applyThemeMode(isLight) {
